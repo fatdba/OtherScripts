@@ -1,5 +1,5 @@
 -- Version 1.0
--- Date : 2022-08015
+-- Date : 2022-08-15
 
 WITH 
 target_list AS 
