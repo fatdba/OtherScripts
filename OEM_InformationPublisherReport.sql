@@ -2,6 +2,10 @@
 -- Version 1.0 
 --
 --
+--
+-- Author: Prashant 'The FatDBA' Dixit
+--
+
 WITH 
 target_list AS 
 (SELECT target_name oem_target_name,
