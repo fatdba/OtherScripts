@@ -1,6 +1,10 @@
 -- Version 1.0
 -- Date : 2022-08-15
 -- Author : Prashant TheFatDBA Dixit
+--
+-- Author: Prashant 'The FatDBA' Dixit
+--
+
 
 WITH 
 target_list AS 
