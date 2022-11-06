@@ -1,6 +1,6 @@
 set termout off
 set linesize 90
-set pagesize 20
+set pagesize 21
 ttitle center 'PDHC1.4 -  A Quick Health Check' skip 2
 btitle center '<span style="background-color:#38761d;color:#ffffff;border:1px solid black;">PART - 1</span>'
 set markup html on spool on entmap off
