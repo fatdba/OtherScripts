@@ -1,5 +1,9 @@
 REM AWR-Generator.sql: Script for creating multiple consecutive Oracle AWR Reports
 REM
+REM
+REM
+REM
+REM
 REM Creates an output SQL script which, when run, will generate all AWR Reports
 REM between the specificed start and end snapshot IDs, for all instances
 REM
