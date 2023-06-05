@@ -4,7 +4,7 @@
 echo -e '\E[36m'"*************************************************************************************" $prashantdixit $setis
 echo -e '\E[36m'"Edited by (Version 2.1) : prashant Dixit ---> prashantdixit@fatdba.com" $prashantdixit $auth
 echo -e '\E[36m'"DB + OS level monitoring for EDB PostgreSQL Database" $prashantdixit $auth
-echo -e '\E[36m'"Date/Version : 07/27/2022  #2.1" $prashantdixit $date
+echo -e '\E[36m'"Date/Version : 05/06/2023  #2.1" $prashantdixit $date
 echo -e '\E[36m'" " $prashantdixit $date
 echo -e '\E[36m'"Usage : ./db_edb_OS_health_V2.1.sh" $prashantdixit $date
 echo -e '\E[36m'"************************************************************************************" $prashantdixit $setis
