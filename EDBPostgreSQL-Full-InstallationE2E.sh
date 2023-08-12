@@ -5,7 +5,7 @@ NC='\033[0m'
 RED='\e[0;31m'
 echo -e "${GREEN}***********************************************************************${NC}"
 echo -e "${GREEN}******* Tool   : EDB Advanced Server Installer ************************${NC}"
-echo -e "${GREEN}******* Author : Fabio Navarro (My Friend)     ************************${NC}"
+echo -e "${GREEN}******* Author : Prashant Dixit                ************************${NC}"
 echo -e "${GREEN}******* Version: 1.0                           ************************${NC}"
 echo -e "${GREEN}***********************************************************************${NC}"
 echo -e ""
