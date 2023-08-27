@@ -1,17 +1,6 @@
-def create_or_alter_table(parameter_list, table_name):
-    """
-    parameter_list: list of table column headers
-    table_name: name of the table you are going to create
-    """
-    secrets_client = boto3.client('secretsmanager')
-    reporting_db_secret_arn = os.getenv("db_secret_arn")
-    sql = f"""
-    create table if not exists {table_name} (Id int GENERATED ALWAYS AS IDENTITY, RecordedTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, ScanId Varchar(10));
-    """
-    status_code, status = run_query(secrets_client, reporting_db_secret_arn, sql)  # Unpack only two values
-    # sql = ''
-    for each in parameter_list:
-        sql += f"""
-        alter table {table_name} add column if not exists {each} varchar(500);
-        """
-    status_code, status = run_query(secrets_client, reporting_db_secret_arn, sql)
+[ERROR] ValueError: too many values to unpack (expected 2)
+Traceback (most recent call last):
+  File "/var/task/lambda_function.py", line 603, in lambda_handler
+    create_or_alter_table(summary_table_parameter_list, summary_table_name)
+  File "/var/task/lambda_function.py", line 75, in create_or_alter_table
+    status_code, status = run_query(secrets_client, reporting_db_secret_arn, sql)  # Unpack only two values
