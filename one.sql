@@ -1,4 +1,13 @@
-[ERROR] ValueError: not enough values to unpack (expected 3, got 2)
-Traceback (most recent call last):
-  File "/var/task/lambda_function.py", line 581, in lambda_handler
-    status_code,status,result=run_query(reporting_db_secrets_client,reporting_db_secret_arn,sql)
+def run_query(secrets_client, secret_arn, sql):
+    try:
+        # ... (your existing code)
+        
+        result = pgs.run_query_using_secrets(secrets_client, secret_arn, sql)
+        
+        status = "Successfully executed query"
+        status_code = 0
+        
+    except Exception as e:
+        # ... (your existing code)
+        
+    return status_code, status, result
