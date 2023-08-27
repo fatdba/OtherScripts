@@ -1,21 +1,6 @@
-def run_query(secrets_client, secret_arn, sql):
-    try:
-        # check if connection to RDS works
-        dbconn = pgs.get_connection(pgs.get_secret_dict(secrets_client, secret_arn, "AWSCURRENT"))
-        if dbconn:
-            result = pgs.run_query_using_secrets(secrets_client, secret_arn, sql)
-            status = f"Successfully executed query"
-            logger.info("%s" % status)
-            status_code = 0
-        else:
-            status = f"Unable to login to server with secret"
-            logger.info("%s" % status)
-            status_code = -1
-            result = None
-    except Exception as e:
-        status = f"Query execution failed: {e}"
-        logger.info("%s" % status)
-        status_code = -1
-        result = None
-
-    return status_code, status, result
+[ERROR] ValueError: too many values to unpack (expected 2)
+Traceback (most recent call last):
+  File "/var/task/lambda_function.py", line 606, in lambda_handler
+    create_or_alter_table(summary_table_parameter_list, summary_table_name)
+  File "/var/task/lambda_function.py", line 79, in create_or_alter_table
+    status_code, status = run_query(secrets_client, reporting_db_secret_arn, sql)
