@@ -1,8 +1,4 @@
-# ...
-sql = f"""
-SELECT nextval('scan_sequence');
-"""
-status_code, status = run_query(reporting_db_secrets_client, reporting_db_secret_arn, sql)
-print("result: ", result)
-scan_id = str(result[0]._asdict()["nextval"])
-# ...
+[ERROR] ValueError: not enough values to unpack (expected 3, got 2)
+Traceback (most recent call last):
+  File "/var/task/lambda_function.py", line 581, in lambda_handler
+    status_code,status,result=run_query(reporting_db_secrets_client,reporting_db_secret_arn,sql)
