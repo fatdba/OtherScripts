@@ -1,4 +1,4 @@
-[ERROR] ValueError: too many values to unpack (expected 2)
+[ERROR] IndexError: list index out of range
 Traceback (most recent call last):
-  File "/var/task/lambda_function.py", line 579, in lambda_handler
-    status_code, status = run_query(reporting_db_secrets_client, reporting_db_secret_arn, sql)
+  File "/var/task/lambda_function.py", line 581, in lambda_handler
+    scan_id = str(result[0]._asdict()["nextval"])
