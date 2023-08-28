@@ -1,6 +1,7 @@
-[ERROR] IndexError: list index out of range
-Traceback (most recent call last):
-  File "/var/task/lambda_function.py", line 891, in lambda_handler
-    generate_csv_and_pdf_reports_for_the_drift_tables(reporting_db_secrets_client, reporting_db_secret_arn, table_names_list, scan_id)
-  File "/var/task/lambda_function.py", line 491, in generate_csv_and_pdf_reports_for_the_drift_tables
-    header_list = [str(i) for i in result[0]._asdict().keys()]
+query_using_secrets: Execption encountered executing query ERROR:  column "Exception Caught - Error = argument of type 'NoneType' is not i" does not exist
+LINE 1: ... Summary) VALUES ('23', 'ALL', 'ALL', 'NA', 'NA', "Exception...
+                                                             ^
+.
+[INFO]	2023-08-28T16:03:20.147Z	dffade78-35ff-4a8e-b404-0ca7a4b26b42	Query execution failed: query_using_secrets: Execption encountered executing query ERROR:  column "Exception Caught - Error = argument of type 'NoneType' is not i" does not exist
+LINE 1: ... Summary) VALUES ('23', 'ALL', 'ALL', 'NA', 'NA', "Exception...
+                                                             ^
