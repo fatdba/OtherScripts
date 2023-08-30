@@ -1,8 +1,13 @@
-{
-  "errorMessage": "Syntax error in module 'lambda_function': expected an indented block (lambda_function.py, line 618)",
-  "errorType": "Runtime.UserCodeSyntaxError",
-  "requestId": "b60dbbd3-5a8a-4d49-9551-ab3ae298172f",
-  "stackTrace": [
-    "  File \"/var/task/lambda_function.py\" Line 618\n        reporting_db_secrets_client = boto3.client('secretsmanager')\n"
-  ]
-}
+# ... (previous code)
+#updates summary table
+update_table(summary_list, summary_table_parameter_list, summary_table_name)
+if flag == 2:
+    table_names_list = ["public_role_privileges", "audit_role_privileges", summary_table_name, "instances_info", "snapshots_info"]
+elif flag == 1:
+    table_names_list = ["audit_role_privileges", summary_table_name, "instances_info", "snapshots_info"]
+else:
+    table_names_list = [summary_table_name, "instances_info", "snapshots_info"]
+#generate CSV and pdf files of the tables for each scan
+print("flag:", flag)
+print(table_names_list)
+generate_csv_and_pdf_reports_for_the_drift_tables(reporting_db_secrets_client, reporting_db_secret_arn, table_names_list, scan_id)
