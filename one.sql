@@ -32,3 +32,24 @@ pg_auth_members b ON a.oid = b.member
 INNER JOIN
 pg_roles c ON b.roleid = c.oid
 ) AS assigned_users ON superuser_roles.superuser_role_id = assigned_users.other_role_id;
+
+
+
+
+SELECT
+    r.rolname AS superuser_role,
+    r.rolcanlogin,
+    'ALL' AS placeholder1,
+    'ALL' AS placeholder2,
+    'ALL' AS placeholder3,
+    'ALL' AS placeholder4,
+    'SUPERUSER' AS placeholder5,
+    'SERVER' AS placeholder6,
+    m.member AS user_with_role
+FROM
+    pg_roles r
+JOIN
+    pg_auth_members m ON r.oid = m.roleid
+WHERE
+    r.rolsuper IS TRUE;
+
