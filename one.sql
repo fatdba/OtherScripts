@@ -1,18 +1,10 @@
-def get_audit_role_privileges_userinfo(secrets_client, secret_arn):
-    sql = """
-    select a.oid as user_role_id
-    , a.rolname as user_role_name
-    , b.roleid as other_role_id
-    , c.rolname as other_role_name
-    from pg_roles a
-    inner join pg_auth_members b on a.oid=b.member
-    inner join pg_roles c on b.roleid=c.oid;
-    """
-    result = pgs.run_query_using_secrets(secrets_client, secret_arn, sql)
-    return result
-
-
-
+# Modify the table_names_list based on the value of 'flag'
+if flag == 2:
+    table_names_list = ["public_role_privileges", "audit_role_privileges", "audit_role_privileges_userinfo", summary_table_name, "instances_info", "snapshots_info"]
+elif flag == 1:
+    table_names_list = ["audit_role_privileges", "audit_role_privileges_userinfo", summary_table_name, "instances_info", "snapshots_info"]
+else:
+    table_names_list = ["audit_role_privileges_userinfo", summary_table_name, "instances_info", "snapshots_info"]
 
 # Call the function to get the data
 audit_role_privileges_userinfo_data = get_audit_role_privileges_userinfo(reporting_db_secrets_client, reporting_db_secret_arn)
