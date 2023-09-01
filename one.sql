@@ -1,6 +1,2 @@
-[ERROR] IndexError: list index out of range
-Traceback (most recent call last):
-  File "/var/task/lambda_function.py", line 942, in lambda_handler
-    generate_csv_and_pdf_reports_for_the_drift_tables(reporting_db_secrets_client, reporting_db_secret_arn, table_names_list, scan_id)
-  File "/var/task/lambda_function.py", line 506, in generate_csv_and_pdf_reports_for_the_drift_tables
-    header_list = [str(i) for i in result[0]._asdict().keys()]
+audit_role_privileges_userinfo_parameter_list = ["user_role_id", "user_role_name", "other_role_id", "other_role_name"]
+create_or_alter_table(audit_role_privileges_userinfo_parameter_list, table_name="audit_role_privileges_userinfo")
