@@ -1,46 +1,92 @@
-CloudWatch
-Log groups
-/aws/lambda/drift_detection_latest_prashant
-2023/09/01/[$LATEST]e94f6062729a4e9b8b9a7fba5e15da2e
+def generate_csv_and_pdf_reports_for_the_drift_tables(secrets_client, reporting_db_secret_arn, table_names_list, scan_id):
+    """
+    Function to gnereate CSV and pdf reports from the tables in drift reporting database
+    secrets_client: Parameter to connect to Drift Reporting DB
+    table_names_list: list of the all the drift tables to generate CSV and PDf reports from.
+    scan_id: Represents the Sacn ID for this current lambda invocation. And Scan ID will be incremented with each invocation.
+    """
+    #Creates S3 bucket if not exist for storing the CSV and PDF reports of drift DB
+    s3_resource = boto3.resource('s3')
+    s3_bucket_name = 'edm-db-drift-detection-reports-'+os.getenv('environment')
+    bucket = s3_resource.Bucket(s3_bucket_name)
+    if bucket.creation_date:
+        print("s3 bucket: "+s3_bucket_name+' Exists')
+    else:
+        response = bucket.create(CreateBucketConfiguration={'LocationConstraint': 'us-east-2'})
+    s3_client = boto3.client('s3')
 
+    #using font lib for calculating Sizes for pdf files
+    font = ImageFont.load_default()
 
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (16386, 'rds_superuser', 3373, 'pg_monitor');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (3373, 'pg_monitor', 3374, 'pg_read_all_settings');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (3373, 'pg_monitor', 3375, 'pg_read_all_stats');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (3373, 'pg_monitor', 3377, 'pg_stat_scan_tables');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (16386, 'rds_superuser', 4200, 'pg_signal_backend');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20515, 'fitb_admin', 16386, 'rds_superuser');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (16399, 'db_admin', 16386, 'rds_superuser');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (16386, 'rds_superuser', 16387, 'rds_replication');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20572, 'iam-bigid_user', 16388, 'rds_iam');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20567, 'iam-edm-pg_owner', 16388, 'rds_iam');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20565, 'iam-edm-pg_ro', 16388, 'rds_iam');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20563, 'iam-edm-pg_rw', 16388, 'rds_iam');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (16386, 'rds_superuser', 16389, 'rds_password');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20567, 'iam-edm-pg_owner', 20559, 'edmpg_db_owner');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20566, 'edm-pg_owner', 20559, 'edmpg_db_owner');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20515, 'fitb_admin', 20559, 'edmpg_db_owner');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20563, 'iam-edm-pg_rw', 20560, 'edmpg_db_rw');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20562, 'edm-pg_rw', 20560, 'edmpg_db_rw');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20515, 'fitb_admin', 20560, 'edmpg_db_rw');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20572, 'iam-bigid_user', 20561, 'edmpg_db_ro');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20571, 'bigid_user', 20561, 'edmpg_db_ro');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20565, 'iam-edm-pg_ro', 20561, 'edmpg_db_ro');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20564, 'edm-pg_ro', 20561, 'edmpg_db_ro');
-SQL Statement: INSERT INTO audit_role_privileges_userinfo (user_role_id, user_role_name, other_role_id, other_role_name) VALUES (20515, 'fitb_admin', 20561, 'edmpg_db_ro');
+    #Looping Through Tables
+    for each_table in table_names_list:
+        print(each_table)
+        #get table data
+        sql = f"""
+        select*from {each_table} where scanid = {str(scan_id)}::varchar;
+        """
+        print("before_run_query_using_secrets")
+        result = pgs.run_query_using_secrets(secrets_client, reporting_db_secret_arn, sql)
+        print("after_run_query_using_secrets")
+        print(result)
+        print("printresult")
+        result_list = [each._asdict() for each in result]
+        
+        # added by Prashant 
+        if not result:
+            # Handle the case where the result is empty (no rows returned)
+            print(f"No data found for {each_table}")
+            continue
+            
+        #Parse Db table data and create CSV and PDF files
+        header_list = [str(i) for i in result[0]._asdict().keys()]
+        Column_sizes = [font.getsize(str(i)) for i in result[0]._asdict().keys()]
 
+        file_name = str(each_table)+'_scan_'+str(scan_id)+'.csv'
+        file_path = "/tmp/"+file_name
 
-flag: 2
-['public_role_privileges', 'audit_role_privileges', 'audit_role_privileges_userinfo', 'connection_summary', 'instances_info', 'snapshots_info']
-
-printresult
-audit_role_privileges_userinfo
-before_run_query_using_secrets
-[INFO]	2023-09-01T22:46:07.195Z	4123b7ad-a9e1-4be8-9af5-36539c810ddb	DB name passed as parameter: None
-[INFO]	2023-09-01T22:46:07.196Z	4123b7ad-a9e1-4be8-9af5-36539c810ddb	DB name being used: edmpg_db
-[INFO]	2023-09-01T22:46:07.227Z	4123b7ad-a9e1-4be8-9af5-36539c810ddb	Successfully established SSL/TLS connection as user 'db_admin' with host: 'edm-pg-v2.cluster-cv88e32pyp96.us-east-2.rds.amazonaws.com'
-[INFO]	2023-09-01T22:46:07.240Z	4123b7ad-a9e1-4be8-9af5-36539c810ddb	query_using_secrets: Successfully executed query in PostgreSQL DB using secret in arn:aws:secretsmanager:us-east-2:219586591115:secret:/secret/edm-pg/rds-password-dPyQM8.
-after_run_query_using_secrets
-[]
-printresult
-No data found for audit_role_privileges_userinfo
+        pdf_file_name = str(each_table)+'_scan_'+str(scan_id)+'.pdf'
+        pdf_file_path = "/tmp/"+pdf_file_name
+        file_exists = os.path.exists(file_path)
+        if not file_exists:
+            #Creates CSV files
+            with open(file_path,"w") as file:
+                writer_object = csv.writer(file)
+                writer_object.writerow(header_list)
+                for each in result_list:
+                    writer_object.writerow([str(j) for j in each.values()])
+                    #calculating the column sizes for putting table data into pdf
+                    index = 0
+                    for i in each.values():
+                        if Column_sizes[index][0] < font.getsize(str(i))[0]:
+                            Column_sizes[index] = font.getsize(str(i))
+                        index += 1
+                file.close()
+        else:
+            #Updates CSV files
+            with open(file_path,"a+") as file:
+                writer_object = csv.writer(file)
+                for each in result_list:
+                    writer_object.writerow([str(j) for j in each.values()])
+                    #calculating the column sizes for putting table data into pdf
+                    index = 0
+                    for i in each.values():
+                        if Column_sizes[index][0] < font.getsize(str(i))[0]:
+                            Column_sizes[index] = font.getsize(str(i))
+                        index += 1
+                file.close()
+        file_exists = os.path.exists(file_path)
+        #calculating max cel height height and total width of the page
+        total_width = 0
+        max_column_hieght = 0
+        for each in Column_sizes:
+            total_width += each[0]
+            if max_column_hieght < each[1]:
+                max_column_hieght = each[1]
+        if file_exists:
+            #Converts CSV file to PDF file
+            convert(file_path, pdf_file_path, align='L', line_height=max_column_hieght, Column_sizes=Column_sizes, total_width=total_width+50)
+            
+            #Uploading CSV and PDF files to the S3 Bucket
+            s3_client.upload_file(file_path, s3_bucket_name, 'csv_files/{}'.format(file_name))
+            s3_client.upload_file(pdf_file_path, s3_bucket_name, 'pdf_files/{}'.format(pdf_file_name))
