@@ -7,3 +7,9 @@
     "  File \"/var/task/lambda_function.py\", line 60, in update_table\n    sql1 += f\"\"\"INSERT INTO {table_name} {parameter_string} VALUES {tuple(each.values())};\"\"\"\n"
   ]
 }
+
+
+            update_table(users_roles_info, parameter_list, table_name='users_roles_info')
+
+    for each in rds_list:
+        sql1 += f"""INSERT INTO {table_name} {parameter_string} VALUES {tuple(each.values())};"""
