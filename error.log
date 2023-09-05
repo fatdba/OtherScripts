@@ -1,10 +1,9 @@
 {
-  "errorMessage": "query_using_secrets: Execption encountered executing query ERROR:  syntax error at or near \",\"\nLINE 2:                     select a.oid as user_role_id,, a.rolname...\n                                                         ^\n.",
+  "errorMessage": "query_using_secrets: Execption encountered executing query ERROR:  syntax error at or near \"join\"\nLINE 2: ....rolname as other_role_name from pg_roles a,inner join pg_au...\n                                                             ^\n.",
   "errorType": "ValueError",
-  "requestId": "0a1eb88f-e351-42d8-9ee1-f23dca522ec2",
+  "requestId": "4a0c5765-c6e3-4836-bc89-760f26a40dac",
   "stackTrace": [
     "  File \"/var/task/lambda_function.py\", line 774, in lambda_handler\n    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)\n",
     "  File \"/opt/python/lib/python3.9/site-packages/postgres_utils.py\", line 416, in run_query_using_secrets\n    raise ValueError(\"query_using_secrets: Execption encountered executing query %s.\" % e)\n"
   ]
 }
-
