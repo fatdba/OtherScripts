@@ -1,3 +1,1 @@
-postgres=#  CREATE EXTENSION sslutils
-postgres-# ;
-ERROR:  could not open extension control file "/usr/pgsql-14/share/extension/sslutils.control": No such file or directory
+https://teams.microsoft.com/l/meetup-join/19%3ameeting_NzY5YzM4MDUtMmRlZi00Yjg3LWE0Y2EtMzMxZDIwYmQxMGNi%40thread.v2/0?context=%7b%22Tid%22%3a%22cfddba29-ca2a-450c-a415-595e7fcce8e5%22%2c%22Oid%22%3a%2209cca293-15fc-4328-8ca6-37cf41857a49%22%7d
