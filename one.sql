@@ -1,15 +1,11 @@
-{
-  "errorMessage": "'Row' object has no attribute 'values'",
-  "errorType": "AttributeError",
-  "requestId": "eff130e8-af60-45c0-abde-81686b823fc7",
-  "stackTrace": [
-    "  File \"/var/task/lambda_function.py\", line 920, in lambda_handler\n    update_table(users_roles_info, parameter_list, table_name='users_roles_info')\n",
-    "  File \"/var/task/lambda_function.py\", line 60, in update_table\n    sql1 += f\"\"\"INSERT INTO {table_name} {parameter_string} VALUES {tuple(each.values())};\"\"\"\n"
-  ]
-}
-
-
-            update_table(users_roles_info, parameter_list, table_name='users_roles_info')
-
+#updates the given table
+def update_table(rds_list, parameter_list, table_name):
+    secrets_client = boto3.client('secretsmanager')
+    reporting_db_secret_arn = os.getenv("db_secret_arn")
+    parameter_string = "("+", ".join(parameter_list)+")"
+    sql = f"""select * from {table_name};"""
+    sql1 = ''
     for each in rds_list:
         sql1 += f"""INSERT INTO {table_name} {parameter_string} VALUES {tuple(each.values())};"""
+    sql1 = sql1+sql
+    status_code,status=run_query(secrets_client,reporting_db_secret_arn,sql1)
