@@ -1,0 +1,10 @@
+{
+  "errorMessage": "Unable to log into database with current secret of secret ARN arn:aws:secretsmanager:us-east-2:219586591115:secret:/secret/edm-pg/rds-password-dPyQM8",
+  "errorType": "ValueError",
+  "requestId": "d3cf6f10-55b8-4db4-b397-d0724a319445",
+  "stackTrace": [
+    "  File \"/var/task/lambda_function.py\", line 954, in lambda_handler\n    generate_csv_and_pdf_reports_for_the_drift_tables(reporting_db_secrets_client, reporting_db_secret_arn, table_names_list, scan_id)\n",
+    "  File \"/var/task/lambda_function.py\", line 519, in generate_csv_and_pdf_reports_for_the_drift_tables\n    result = pgs.run_query_using_secrets(secrets_client, reporting_db_secret_arn, sql)\n",
+    "  File \"/opt/python/lib/python3.9/site-packages/postgres_utils.py\", line 426, in run_query_using_secrets\n    raise ValueError(\"Unable to log into database with current secret of secret ARN %s\" % arn)\n"
+  ]
+}
