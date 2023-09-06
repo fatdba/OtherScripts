@@ -400,15 +400,10 @@ def get_account_ids():
     
     return acct_ids_dict, error
 
-def get_user_roles_list(scan_id, acct_id, result):
-    #Parse the sqlquery output and add to the list as dict for updating the audit roles table.
-    user_roles_list = []
+def get_user_roles_list(scan_id, acct_id, user_roles_list, result):
+    #Parse the sqlquery output and add to the list as dict for updating the user roles table.
     print(result)
     for each in result:
-        print("-------------------------")
-        print(each)
-        print("-------------------------")
-
         each_dict = each._asdict()
         user_roles_list.append({
             'ScanId':scan_id,
@@ -420,10 +415,6 @@ def get_user_roles_list(scan_id, acct_id, result):
         })
 
     print(user_roles_list)
-    if user_roles_list:
-        parameter_list = user_roles_list[0].keys()
-        create_or_alter_table(parameter_list, table_name="user_roles")
-        update_table(user_roles_list, parameter_list, table_name="user_roles")
 
     return user_roles_list
 
@@ -732,6 +723,7 @@ def lambda_handler(event, context):
         now = datetime.now()
         audit_roles_list = []
         public_roles_list = []
+        user_roles_list = []
         while index < len(rds_secrets_list):
             if rds_secrets_list[index]['DBAdminSecretARN'] != "":
                 #test_db_admin_secret
@@ -911,7 +903,7 @@ def lambda_handler(event, context):
                     inner join pg_roles c on b.roleid=c.oid;
                     """
                     result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    user_roles_list = get_user_roles_list(scan_id, acct_id, result)
+                    user_roles_list = get_user_roles_list(scan_id, acct_id, user_roles_list, result)
                     if result:
                         print("result_type9: ", type(result[0]))
                         print("result: ", result[0]._asdict())
@@ -922,6 +914,10 @@ def lambda_handler(event, context):
             index = index + 1
         
         # print("rds_list: ", rds_list)
+        if user_roles_list:
+            parameter_list = user_roles_list[0].keys()
+            create_or_alter_table(parameter_list, table_name="user_roles")
+            update_table(user_roles_list, parameter_list, table_name="user_roles")
         if audit_roles_list:
             flag = 1
             parameter_list = audit_roles_list[0].keys()
