@@ -413,12 +413,36 @@ def get_user_roles_list(scan_id, acct_id, user_roles_list, result):
             'user_role_name':each_dict.get("user_role_name"),
             'role_can_login':each_dict.get("role_can_login"),
             'other_role_id':each_dict.get("other_role_id"),
-            'other_role_name':each_dict.get("other_role_name")
+            'other_role_name':each_dict.get("other_role_name"),
+            'has_replication_perm': each_dict.get("has_replication_perm"),
+            'has_createrole_perm': each_dict.get("has_createrole_perm"),
+            'has_createdb_perm': each_dict.get("has_createdb_perm")
         })
 
     print(user_roles_list)
 
     return user_roles_list
+
+# Added by Prashant 
+# Date : 09/11/2023
+def get_database_permissions_list(scan_id, acct_id, database_permissions_list, result) :
+    print(result)
+    for each in result:
+        each_dict = each._asdict()
+        database_permissions_list.append({
+            'ScanId':scan_id,
+            'AccountID': acct_id,
+            'rolname':each_dict.get("rolname"),
+            'datname':each_dict.get("datname"),
+            'privileges':each_dict.get("privileges"),
+            'level':each_dict.get("level"),
+            'rolcanlogin':each_dict.get("rolcanlogin")
+        })
+
+    print(database_permissions_list)
+
+    return database_permissions_list
+    
 
 
 def get_audit_roles_list(scan_id, acct_id, rds_identifier, audit_roles_list, result, dbname):
@@ -629,7 +653,7 @@ def lambda_handler(event, context):
     summary_table_parameter_list = ["ScanID", "AccountID", "AccountName", "RDSIdentifier", "SecretARN", "Summary"]
     
     #Creates connection_summary table.
-    create_or_alter_table(summary_table_parameter_list, summary_table_name)
+    create_or_alter_table(summary_table_parameter_list, summary_table_name) 
 
     #Get list of account ID's based on environment
     acct_ids_dict, error = get_account_ids()
@@ -737,6 +761,8 @@ def lambda_handler(event, context):
         public_roles_list = []
         #added by Prashant
         user_roles_list = []
+        #added by Prashant
+        database_permissions_list = []
         while index < len(rds_secrets_list):
             if rds_secrets_list[index]['DBAdminSecretARN'] != "":
                 #test_db_admin_secret
@@ -905,6 +931,8 @@ def lambda_handler(event, context):
                         print("result_type8: ", type(result[0]))
                         print("result: ", result[0]._asdict())
 
+                    # Added by Prashant
+                    # Main SQL to get USER ROLE LIST report 
                     #GETTING USER ROLE LIST
                     sql = f"""
                     select a.oid as user_role_id
@@ -912,17 +940,57 @@ def lambda_handler(event, context):
                     , a.rolcanlogin as role_can_login
                     , b.roleid as other_role_id
                     , c.rolname as other_role_name
+                    , a.rolreplication as has_replication_perm
+                    , a.rolcreaterole as has_createrole_perm
+                    , a.rolcreatedb as has_createdb_perm
                     from pg_roles a
                     inner join pg_auth_members b on a.oid=b.member
                     inner join pg_roles c on b.roleid=c.oid
                     WHERE
-                    a.rolsuper = true;
+                    a.rolsuper = true
+                    OR a.rolreplication = true
+                    OR a.rolcreaterole = true
+                    OR a.rolcreatedb = true;
                     """
                     result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
                     user_roles_list = get_user_roles_list(scan_id, acct_id, user_roles_list, result)
                     if result:
                         print("result_type9: ", type(result[0]))
                         print("result: ", result[0]._asdict())
+                        
+                    
+                    # Added by Prashant
+                    # Main SQL to get database permissions list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname,
+                        datname,
+                        ARRAY_AGG(
+                            CASE
+                                WHEN has_database_privilege(r.rolname, c.oid, 'CONNECT') THEN 'CONNECT'
+                                WHEN has_database_privilege(r.rolname, c.oid, 'CREATE') THEN 'CREATE'
+                                WHEN has_database_privilege(r.rolname, c.oid, 'TEMPORARY') THEN 'TEMPORARY'
+                                WHEN has_database_privilege(r.rolname, c.oid, 'TEMP') THEN 'CONNECT'
+                                ELSE NULL
+                            END
+                        ) AS privileges,
+                        'DATABASE' AS level,
+                        r.rolcanlogin
+                    FROM
+                        pg_database c
+                    JOIN
+                        pg_roles r ON has_database_privilege(r.rolname, c.oid, 'CONNECT,CREATE,TEMPORARY,TEMP')
+                    WHERE
+                        datname = current_database()
+                    GROUP BY
+                        r.rolname, datname, r.rolcanlogin;
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    database_permissions_list = get_database_permissions_list(scan_id, acct_id, database_permissions_list, result)
+                    if result:
+                        print("result_type10: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                    
 
             else:
                 logger.info("DBAdminSecretName is not present in secret manager for the DB: %s" %(rds_secrets_list[index]["DBInstanceID"]))
@@ -935,6 +1003,10 @@ def lambda_handler(event, context):
             parameter_list = user_roles_list[0].keys()
             create_or_alter_table(parameter_list, table_name="user_roles")
             update_table(user_roles_list, parameter_list, table_name="user_roles")
+        if database_permissions_list:
+            parameter_list = database_permissions_list[0].keys()
+            create_or_alter_table(parameter_list, table_name="database_permissions")
+            update_table(database_permissions_list, parameter_list, table_name="database_permissions")
         if audit_roles_list:
             flag = 1
             parameter_list = audit_roles_list[0].keys()
@@ -951,9 +1023,17 @@ def lambda_handler(event, context):
     #updates summary table
     update_table(summary_list, summary_table_parameter_list, summary_table_name)
     if flag == 2:
-        table_names_list = ["public_role_privileges", "audit_role_privileges",summary_table_name,"instances_info","snapshots_info","user_roles"]
+        table_names_list = ["public_role_privileges", "audit_role_privileges",summary_table_name,"instances_info","snapshots_info"]
+        if user_roles_list:
+            table_names_list.append("user_roles")
+        if database_permissions_list:
+            table_names_list.append("database_permissions")
     elif flag == 1:
-        table_names_list = ["audit_role_privileges",summary_table_name,"instances_info","snapshots_info","user_roles"]
+        table_names_list = ["audit_role_privileges",summary_table_name,"instances_info","snapshots_info"]
+        if user_roles_list:
+            table_names_list.append("user_roles")
+        if database_permissions_list:
+            table_names_list.append("database_permissions")
     else:
         table_names_list = [summary_table_name,"instances_info","snapshots_info"]
     #generate CSV and pdf files of the tables for each scan
