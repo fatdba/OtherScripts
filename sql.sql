@@ -1,4 +1,30 @@
-			-- Database permissions
+SELECT
+    r.rolname,
+    datname,
+    ARRAY_AGG(
+        CASE
+            WHEN has_database_privilege(r.rolname, c.oid, 'CONNECT') THEN 'CONNECT'
+            WHEN has_database_privilege(r.rolname, c.oid, 'CREATE') THEN 'CREATE'
+            WHEN has_database_privilege(r.rolname, c.oid, 'TEMPORARY') THEN 'TEMPORARY'
+            WHEN has_database_privilege(r.rolname, c.oid, 'TEMP') THEN 'CONNECT'
+            ELSE NULL
+        END
+    ) AS privileges,
+    'DATABASE' AS level,
+    r.rolcanlogin
+FROM
+    pg_database c
+JOIN
+    pg_roles r ON has_database_privilege(r.rolname, c.oid, 'CONNECT,CREATE,TEMPORARY,TEMP')
+WHERE
+    datname = current_database()
+GROUP BY
+    r.rolname, datname, r.rolcanlogin;
+
+
+
+
+-- Database permissions
 			insert into audit_role_privileges (rolname,dbname,privileges,level,canlogin)
 			SELECT r.rolname, datname, array(select privs from unnest(ARRAY[
 			( CASE WHEN has_database_privilege(r.rolname,c.oid,'CONNECT') THEN 'CONNECT' ELSE NULL END),
