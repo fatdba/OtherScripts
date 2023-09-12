@@ -180,3 +180,25 @@ WHERE datname = current_database();
 ERROR:  syntax error at or near ")"
 LINE 17: )) AS result
           ^
+
+
+SELECT r.rolname, datname, array(
+    SELECT privs
+    FROM unnest(ARRAY[
+        (CASE WHEN has_database_privilege(r.rolname, c.oid, 'CONNECT') THEN 'CONNECT' ELSE NULL END),
+        (CASE WHEN has_database_privilege(r.rolname, c.oid, 'CREATE') THEN 'CREATE' ELSE NULL END),
+        (CASE WHEN has_database_privilege(r.rolname, c.oid, 'TEMPORARY') THEN 'TEMPORARY' ELSE NULL END),
+        (CASE WHEN has_database_privilege(r.rolname, c.oid, 'TEMP') THEN 'CONNECT' ELSE NULL END)
+    ]) AS foo(privs)
+    WHERE privs IS NOT NULL
+), 'DATABASE', (
+    SELECT CASE WHEN EXISTS (
+        SELECT 1
+        FROM pg_roles
+        WHERE rolname = r.rolname
+        AND rolcanlogin
+    ) THEN 'true' ELSE 'false' END
+)) AS result
+FROM pg_database c
+JOIN pg_roles r ON has_database_privilege(r.rolname, c.oid, 'CONNECT,CREATE,TEMPORARY,TEMP')
+WHERE datname = current_database();
