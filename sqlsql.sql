@@ -16,7 +16,3 @@ WHERE
   n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
   AND c.relkind = 'v'
   AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE');
-
-
-RROR:  missing FROM-clause entry for table "r"
-LINE 1: SELECT  r.rolname,current_database(),'DATABASE',c.oid::regcl...
