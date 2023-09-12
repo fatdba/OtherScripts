@@ -434,16 +434,78 @@ def get_database_permissions_list(scan_id, acct_id, database_permissions_list, r
             'AccountID': acct_id,
             'rolname':each_dict.get("rolname"),
             'datname':each_dict.get("datname"),
-            'privileges':each_dict.get("privileges"),
+            'privileges':",".join(each_dict.get("privileges")),
             'level':each_dict.get("level"),
             'rolcanlogin':each_dict.get("rolcanlogin")
         })
-
-    print(database_permissions_list)
+    
+    #print("database_permissions_list 0",database_permissions_list)
+    #print(database_permissions_list)
 
     return database_permissions_list
     
 
+# Added by Prashant 
+def get_schema_privs_role_list(scan_id, acct_id, schema_privs_role_list, result) :
+    print(result)
+    for each in result:
+        each_dict = each._asdict()
+        schema_privs_role_list.append({
+            'ScanId':scan_id,
+            'AccountID': acct_id,
+            'rolname':each_dict.get("rolname"),
+            'catalog_name':each_dict.get("catalog_name"),
+            'schema_name':each_dict.get("schema_name"),
+            'level':each_dict.get("level"),
+            'database_name':each_dict.get("database_name"),
+            'privs':",".join(each_dict.get("privs")),
+            'rolcanlogin':each_dict.get("rolcanlogin")
+        })
+
+    return schema_privs_role_list
+    
+    
+# Added by Prashant 
+def get_role_specific_privs_list(scan_id, acct_id, role_specific_privs_list, result) :
+    print(result)
+    for each in result:
+        each_dict = each._asdict()
+        role_specific_privs_list.append({
+            'ScanId':scan_id,
+            'AccountID': acct_id,
+            'rolname':each_dict.get("rolname"),
+            'catalog_name':each_dict.get("catalog_name"),
+            'schema_name':each_dict.get("schema_name"),
+            'level':each_dict.get("level"),
+            'database_name':each_dict.get("database_name"),
+            'privilege':each_dict.get("privilege"),
+            'rolcanlogin':each_dict.get("rolcanlogin")
+        })
+
+    return role_specific_privs_list
+
+
+# Added by Prashant 
+def get_role_priv_tables_list(scan_id, acct_id, role_priv_tables_list, result) :
+    print(result)
+    for each in result:
+        each_dict = each._asdict()
+        role_priv_tables_list.append({
+            'ScanId':scan_id,
+            'AccountID': acct_id,
+            'rolname':each_dict.get("rolname"),
+            'catalog_name':each_dict.get("catalog_name"),
+            'database_name':each_dict.get("database_name"),
+            'table_name':each_dict.get("table_name"),
+            'level':each_dict.get("level"),
+            'privilege':each_dict.get("privilege"),
+            'rolcanlogin':each_dict.get("rolcanlogin")
+        })
+
+    return get_role_priv_tables_list
+    
+   
+    
 
 def get_audit_roles_list(scan_id, acct_id, rds_identifier, audit_roles_list, result, dbname):
     #Parse the sqlquery output and add to the list as dict for updating the audit roles table.
@@ -763,6 +825,12 @@ def lambda_handler(event, context):
         user_roles_list = []
         #added by Prashant
         database_permissions_list = []
+        #added by prashant
+        schema_privs_role_list = []
+        #added by prashant
+        role_specific_privs_list = []
+        # added by prashant 
+        role_priv_tables_list = []
         while index < len(rds_secrets_list):
             if rds_secrets_list[index]['DBAdminSecretARN'] != "":
                 #test_db_admin_secret
@@ -990,6 +1058,99 @@ def lambda_handler(event, context):
                     if result:
                         print("result_type10: ", type(result[0]))
                         print("result: ", result[0]._asdict())
+                        
+
+                    # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname,
+                        current_database() AS catalog_name,
+                        n.nspname AS schema_name,
+                        'SCHEMA' AS level,
+                        'DATABASE' AS database_name,
+                        (
+                            SELECT ARRAY_AGG(priv)
+                            FROM (
+                                SELECT
+                                    CASE WHEN has_schema_privilege(r.rolname, n.nspname, 'CREATE') THEN 'CREATE' END AS priv
+                                UNION
+                                SELECT
+                                    CASE WHEN has_schema_privilege(r.rolname, n.nspname, 'USAGE') THEN 'USAGE' END AS priv
+                            ) AS privs
+                            WHERE priv IS NOT NULL
+                        ) AS privs,
+                        r.rolcanlogin
+                    FROM
+                        pg_namespace n
+                    JOIN
+                        pg_roles r ON true
+                    WHERE
+                        has_schema_privilege(r.rolname, n.nspname, 'CREATE,USAGE')
+                        AND n.nspname NOT LIKE 'pg_temp%'
+                        AND n.nspowner <> r.oid;
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    schema_privs_role_list = get_schema_privs_role_list(scan_id, acct_id, schema_privs_role_list, result)
+                    if result:
+                        print("result_type11: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+
+
+
+                    # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname,
+                        current_database() AS catalog_name,
+                        c.schema_name,
+                        'SCHEMA' AS level,
+                        'DATABASE' AS database_name,
+                        'SCHEMA OWNER' AS privilege,
+                        r.rolcanlogin
+                    FROM
+                        information_schema.schemata c
+                    JOIN
+                        pg_roles r ON c.schema_owner = r.rolname
+                    WHERE
+                        has_schema_privilege(r.rolname, c.schema_name, 'CREATE,USAGE')
+                        AND c.schema_name NOT LIKE 'pg_temp%';
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    role_specific_privs_list = get_role_specific_privs_list(scan_id, acct_id, role_specific_privs_list, result)
+                    if result:
+                        print("result_type12: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+
+
+                    # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname,
+                        current_database() AS catalog_name,
+                        'DATABASE' AS database_name,
+                        c.oid::regclass AS table_name,
+                        'TABLE' AS level,
+                        'TABLE OWNER' AS privilege,
+                        r.rolcanlogin
+                    FROM
+                        pg_class c
+                    JOIN
+                        pg_roles r ON c.relowner = r.oid
+                    JOIN
+                        pg_namespace n ON c.relnamespace = n.oid
+                    WHERE
+                        n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
+                        AND c.relkind = 'r'
+                        AND has_schema_privilege(r.rolname, n.oid, 'USAGE');
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    role_priv_tables_list = get_role_priv_tables_list(scan_id, acct_id, role_priv_tables_list, result)
+                    if result:
+                        print("result_type13: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
                     
 
             else:
@@ -998,7 +1159,8 @@ def lambda_handler(event, context):
             index = index + 1
         
         # print("rds_list: ", rds_list)
-        #added by Prashant, next 4 lines 
+        #added by Prashant, next 4 lines
+        #print("database_permissions_list 1",database_permissions_list)        
         if user_roles_list:
             parameter_list = user_roles_list[0].keys()
             create_or_alter_table(parameter_list, table_name="user_roles")
@@ -1007,6 +1169,20 @@ def lambda_handler(event, context):
             parameter_list = database_permissions_list[0].keys()
             create_or_alter_table(parameter_list, table_name="database_permissions")
             update_table(database_permissions_list, parameter_list, table_name="database_permissions")
+            #print("database_permissions_list 2",database_permissions_list)
+            #print("database_permissions_list 2 parameter_list",parameter_list)
+        if schema_privs_role_list:
+            parameter_list = schema_privs_role_list[0].keys()
+            create_or_alter_table(parameter_list, table_name="schema_privs_role")
+            update_table(schema_privs_role_list, parameter_list, table_name="schema_privs_role")
+        if role_specific_privs_list:
+            parameter_list = role_specific_privs_list[0].keys()
+            create_or_alter_table(parameter_list, table_name="role_specific_privs")
+            update_table(role_specific_privs_list, parameter_list, table_name="role_specific_privs")
+        if role_priv_tables_list:
+            parameter_list = role_priv_tables_list[0].keys()
+            create_or_alter_table(parameter_list, table_name="role_priv_tables")
+            update_table(role_priv_tables_list, parameter_list, table_name="role_priv_tables")
         if audit_roles_list:
             flag = 1
             parameter_list = audit_roles_list[0].keys()
@@ -1028,12 +1204,24 @@ def lambda_handler(event, context):
             table_names_list.append("user_roles")
         if database_permissions_list:
             table_names_list.append("database_permissions")
+        if schema_privs_role_list:
+            table_names_list.append("schema_privs_role")
+        if role_specific_privs_list:
+            table_names_list.append("role_specific_privs")
+        if role_specific_privs_list:
+            table_names_list.append("role_priv_tables")
     elif flag == 1:
         table_names_list = ["audit_role_privileges",summary_table_name,"instances_info","snapshots_info"]
         if user_roles_list:
             table_names_list.append("user_roles")
         if database_permissions_list:
             table_names_list.append("database_permissions")
+        if schema_privs_role_list:
+            table_names_list.append("schema_privs_role")
+        if role_specific_privs_list:
+            table_names_list.append("role_specific_privs")
+        if role_specific_privs_list:
+            table_names_list.append("role_priv_tables")
     else:
         table_names_list = [summary_table_name,"instances_info","snapshots_info"]
     #generate CSV and pdf files of the tables for each scan
