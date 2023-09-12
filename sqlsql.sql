@@ -118,3 +118,12 @@ JOIN pg_roles r ON has_database_privilege(r.rolname, c.oid, 'CONNECT,CREATE,TEMP
 LEFT JOIN pg_roles r2 ON r.rolname = r2.rolname
 WHERE datname = current_database();
 
+
+
+
+
+
+ostgres-# WHERE datname = current_database();
+ERROR:  syntax error at or near ")"
+LINE 10: ...lcanlogin IS NOT NULL THEN 'true' ELSE 'false' END) AS resul...
+                                                              ^
