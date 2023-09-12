@@ -32,3 +32,23 @@ WHERE has_database_privilege(r.rolname, c.oid, 'CONNECT,CREATE,TEMPORARY,TEMP') 
 RROR:  column r.rolcanlogin does not exist
 LINE 15: ), 'DATABASE', r.rolcanlogin
                         ^
+
+
+
+SELECT r.rolname, datname, array(
+    SELECT privs
+    FROM unnest(ARRAY[
+        (CASE WHEN has_database_privilege(r.rolname, c.oid, 'CONNECT') THEN 'CONNECT' ELSE NULL END),
+        (CASE WHEN has_database_privilege(r.rolname, c.oid, 'CREATE') THEN 'CREATE' ELSE NULL END),
+        (CASE WHEN has_database_privilege(r.rolname, c.oid, 'TEMPORARY') THEN 'TEMPORARY' ELSE NULL END),
+        (CASE WHEN has_database_privilege(r.rolname, c.oid, 'TEMP') THEN 'CONNECT' ELSE NULL END)
+    ]) AS foo(privs)
+    WHERE privs IS NOT NULL
+), 'DATABASE', (
+    SELECT rolcanlogin
+    FROM pg_roles
+    WHERE rolname = r.rolname
+)) AS result
+FROM pg_database c
+JOIN pg_roles r ON has_database_privilege(r.rolname, c.oid, 'CONNECT,CREATE,TEMPORARY,TEMP')
+WHERE datname = current_database();
