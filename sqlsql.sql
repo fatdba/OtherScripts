@@ -28,3 +28,7 @@ FROM pg_database c
 JOIN roles r ON true
 WHERE has_database_privilege(r.rolname, c.oid, 'CONNECT,CREATE,TEMPORARY,TEMP') AND datname = current_database();
 
+
+RROR:  column r.rolcanlogin does not exist
+LINE 15: ), 'DATABASE', r.rolcanlogin
+                        ^
