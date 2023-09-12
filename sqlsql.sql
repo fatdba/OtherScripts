@@ -1025,35 +1025,6 @@ def lambda_handler(event, context):
                     if result:
                         print("result_type9: ", type(result[0]))
                         print("result: ", result[0]._asdict())
-
-                    # Added by Prashant
-                    # Main SQL to get schema privs role list report 
-                    sql = f"""
-                    SELECT
-                        r.rolname,
-                        current_database() AS catalog_name,
-                        'DATABASE' AS database_name,
-                        c.oid::regclass AS table_name,
-                        'TABLE' AS level,
-                        'TABLE OWNER' AS privilege,
-                        r.rolcanlogin
-                    FROM
-                        pg_class c
-                    JOIN
-                        pg_roles r ON c.relowner = r.oid
-                    JOIN
-                        pg_namespace n ON c.relnamespace = n.oid
-                    WHERE
-                        n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
-                        AND c.relkind = 'r'
-                        AND has_schema_privilege(r.rolname, n.oid, 'USAGE');
-                    """
-                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    print("role_priv_tables_list 2", result)
-                    role_priv_tables_list = get_role_priv_tables_list(scan_id, acct_id, role_priv_tables_list, result)
-                    if result:
-                        print("result_type13: ", type(result[0]))
-                        print("result: ", result[0]._asdict())
                         
                     
                     # Added by Prashant
@@ -1151,6 +1122,37 @@ def lambda_handler(event, context):
                     if result:
                         print("result_type12: ", type(result[0]))
                         print("result: ", result[0]._asdict())
+
+
+                    # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname,
+                        current_database() AS catalog_name,
+                        'DATABASE' AS database_name,
+                        c.oid::regclass AS table_name,
+                        'TABLE' AS level,
+                        'TABLE OWNER' AS privilege,
+                        r.rolcanlogin
+                    FROM
+                        pg_class c
+                    JOIN
+                        pg_roles r ON c.relowner = r.oid
+                    JOIN
+                        pg_namespace n ON c.relnamespace = n.oid
+                    WHERE
+                        n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
+                        AND c.relkind = 'r'
+                        AND has_schema_privilege(r.rolname, n.oid, 'USAGE');
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("role_priv_tables_list 2", result)
+                    role_priv_tables = get_role_priv_tables_list(scan_id, acct_id, role_priv_tables_list, result)
+                    print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type13: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
                     
 
             else:
@@ -1208,7 +1210,7 @@ def lambda_handler(event, context):
             table_names_list.append("schema_privs_role")
         if role_specific_privs_list:
             table_names_list.append("role_specific_privs")
-        if role_specific_privs_list:
+        if role_priv_tables_list:
             table_names_list.append("role_priv_tables")
     elif flag == 1:
         table_names_list = ["audit_role_privileges",summary_table_name,"instances_info","snapshots_info"]
@@ -1220,7 +1222,7 @@ def lambda_handler(event, context):
             table_names_list.append("schema_privs_role")
         if role_specific_privs_list:
             table_names_list.append("role_specific_privs")
-        if role_specific_privs_list:
+        if role_priv_tables_list:
             table_names_list.append("role_priv_tables")
     else:
         table_names_list = [summary_table_name,"instances_info","snapshots_info"]
