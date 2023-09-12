@@ -85,3 +85,32 @@ WHERE
     AND n.nspowner <> r.oid;
 
 
+=@@@@@@@@@@@@@@@@@@@@
+
+
+SELECT
+    r.rolname,
+    current_database() AS catalog_name,
+    n.nspname AS schema_name,
+    'SCHEMA' AS level,
+    'DATABASE' AS database_name,
+    (
+        SELECT ARRAY_AGG(priv)
+        FROM (
+            SELECT
+                CASE WHEN has_schema_privilege(r.rolname, n.nspname, 'CREATE') THEN 'CREATE' END AS priv
+            UNION
+            SELECT
+                CASE WHEN has_schema_privilege(r.rolname, n.nspname, 'USAGE') THEN 'USAGE' END AS priv
+        ) AS privs
+        WHERE priv IS NOT NULL
+    ) AS privs,
+    r.rolcanlogin
+FROM
+    pg_namespace n
+JOIN
+    pg_roles r ON true
+WHERE
+    has_schema_privilege(r.rolname, n.nspname, 'CREATE,USAGE')
+    AND n.nspname NOT LIKE 'pg_temp%'
+    AND n.nspowner <> r.oid;
