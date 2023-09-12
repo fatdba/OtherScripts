@@ -1,22 +1,7 @@
-select r.rolname,catalog_name,schema_name,'SCHEMA' as level, 'DATABASE','SCHEMA OWNER',r.rolcanlogin
-from information_schema.schemata c
-where has_schema_privilege(r.rolname,schema_name,'CREATE,USAGE') 
-and c.schema_name not like 'pg_temp%'
-and schema_owner = r.rolname;
-
-
-SELECT
-    r.rolname,
-    current_database() AS catalog_name,
-    c.schema_name,
-    'SCHEMA' AS level,
-    'DATABASE' AS database_name,
-    'SCHEMA OWNER' AS privilege,
-    r.rolcanlogin
-FROM
-    information_schema.schemata c
-JOIN
-    pg_roles r ON c.schema_owner = r.rolname
-WHERE
-    has_schema_privilege(r.rolname, c.schema_name, 'CREATE,USAGE')
-    AND c.schema_name NOT LIKE 'pg_temp%';
+SELECT  r.rolname,current_database(),'DATABASE',c.oid::regclass,'TABLE', 'TABLE OWNER' ,
+r.rolcanlogin
+FROM pg_class c JOIN pg_namespace n on c.relnamespace=n.oid 
+where n.nspname not in ('information_schema','pg_catalog','sys')  and c.relkind='r' and
+c.relowner =  r.oid
+AND has_schema_privilege(r.rolname,c.relnamespace,'USAGE')
+;
