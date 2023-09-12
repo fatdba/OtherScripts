@@ -1,10 +1,10 @@
-
 Response
 {
-  "errorMessage": "local variable 'role_priv_tables_list' referenced before assignment",
-  "errorType": "UnboundLocalError",
-  "requestId": "fca18cbe-cda8-4e0c-808d-1a29c5562dc9",
+  "errorMessage": "'function' object has no attribute 'append'",
+  "errorType": "AttributeError",
+  "requestId": "19ebab27-4206-4a48-a692-21baf1ba6412",
   "stackTrace": [
-    "  File \"/var/task/lambda_function.py\", line 1182, in lambda_handler\n    if role_priv_tables_list:\n"
+    "  File \"/var/task/lambda_function.py\", line 1150, in lambda_handler\n    role_priv_tables_list = get_role_priv_tables_list(scan_id, acct_id, role_priv_tables_list, result)\n",
+    "  File \"/var/task/lambda_function.py\", line 493, in get_role_priv_tables_list\n    role_priv_tables_list.append({\n"
   ]
 }
