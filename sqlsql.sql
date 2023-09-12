@@ -11,3 +11,23 @@ and schema_owner <> r.rolname;
 RROR:  missing FROM-clause entry for table "r"
 LINE 1: select r.rolname,catalog_name,schema_name,'SCHEMA' as level,...
                ^
+
+
+
+SELECT r.rolname, catalog_name, schema_name, 'SCHEMA' AS level, 'DATABASE',
+  ARRAY(
+    SELECT privs
+    FROM unnest(ARRAY[
+        (CASE WHEN has_schema_privilege(r.rolname, c.schema_name, 'CREATE') THEN 'CREATE' ELSE NULL END),
+        (CASE WHEN has_schema_privilege(r.rolname, c.schema_name, 'USAGE') THEN 'USAGE' ELSE NULL END)
+    ])) AS privs,
+  r.rolcanlogin
+FROM (
+  SELECT s.schema_name, s.catalog_name, u.rolname, s.schema_owner
+  FROM information_schema.schemata s
+  JOIN pg_user u ON u.usename = current_user
+  WHERE has_schema_privilege(u.rolname, s.schema_name, 'CREATE,USAGE')
+    AND s.schema_name NOT LIKE 'pg_temp%'
+    AND s.schema_owner <> u.rolname
+) AS c
+JOIN pg_roles r ON r.rolname = c.rolname;
