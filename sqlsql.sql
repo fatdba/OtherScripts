@@ -1,12 +1,30 @@
-SELECT
-    r.rolname AS role_name,
-    current_database() AS database_name,
-    'DATABASE' AS object_type,
-    l.lanname AS object_name,
-    'LANGUAGE' AS privilege_type,
-    ARRAY[CASE WHEN has_language_privilege(r.rolname, l.lanname, 'USAGE') THEN 'USAGE' ELSE NULL END] AS privileges,
-    r.rolcanlogin AS can_login
-FROM
-    pg_catalog.pg_language l
-JOIN
-    pg_catalog.pg_roles r ON has_language_privilege(r.rolname, l.lanname, 'USAGE');
+with elevated_perm_proc as
+(
+SELECT  row_number() over( order by p.oid),p.oid,nspname,proname,format_type(unnest(proargtypes)::oid,NULL)
+FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid JOIN
+pg_authid a ON a.oid = p.proowner 
+WHERE prosecdef OR NOT proconfig IS NULL
+),
+
+func_with_elvated_priv as
+(
+select  oid,nspname,proname,array_to_string(array_agg(format_type),',') as proc_param
+from elevated_perm_proc
+group by oid,nspname,proname
+union
+select p.oid,nspname,proname,' ' as proc_param
+FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid JOIN
+pg_authid a ON a.oid = p.proowner 
+WHERE (prosecdef OR NOT proconfig IS NULL)
+and p.oid not in
+(select oid from elevated_perm_proc )
+),
+func_with_elvated_priv1 as
+( select current_database() as dbname,'DATABASE' as level ,nspname||'.'||proname||'('||proc_param||')' as f
+from func_with_elvated_priv 
+            where nspname not in ('dbms_scheduler','dbms_session','pg_catalog','sys','utl_http')
+)
+insert into audit_role_privileges (rolname,dbname,level,object_name,object_type,privileges,canlogin)
+SELECT r.rolname, func.*,'FUNCTION','Elevated Privileges',r.rolcanlogin
+from func_with_elvated_priv1 func
+where has_function_privilege(r.rolname,func.f,'execute')=true;
