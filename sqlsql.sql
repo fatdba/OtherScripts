@@ -58,3 +58,30 @@ FROM (
 ) AS c
 JOIN pg_roles r ON r.rolname = c.rolname;
 
+
+
+=========
+
+SELECT
+    r.rolname,
+    current_database() AS catalog_name,
+    n.nspname AS schema_name,
+    'SCHEMA' AS level,
+    'DATABASE' AS database_name,
+    ARRAY(
+        SELECT privs
+        FROM unnest(ARRAY[
+            (CASE WHEN has_schema_privilege(r.rolname, n.nspname, 'CREATE') THEN 'CREATE' ELSE NULL END),
+            (CASE WHEN has_schema_privilege(r.rolname, n.nspname, 'USAGE') THEN 'USAGE' ELSE NULL END)
+        ])) AS privs,
+    r.rolcanlogin
+FROM
+    pg_namespace n
+JOIN
+    pg_roles r ON true
+WHERE
+    has_schema_privilege(r.rolname, n.nspname, 'CREATE,USAGE')
+    AND n.nspname NOT LIKE 'pg_temp%'
+    AND n.nspowner <> r.oid;
+
+
