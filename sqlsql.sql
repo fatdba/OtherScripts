@@ -1,5 +1,7 @@
---database permissions
 
+-- report name : database_permissions
+-- provide a summary of database privileges for each role in the current PostgreSQL database. 
+-- It lists the roles, the database they have privileges on, the types of privileges they have (CONNECT, CREATE, TEMPORARY), and whether they can log in.
 SELECT
     r.rolname,
     datname,
@@ -21,19 +23,13 @@ JOIN
 WHERE
     datname = current_database()
 GROUP BY
-    r.rolname, datname, r.rolcanlogin;
-
-          rolname          | datname  | privileges |  level   | rolcanlogin
----------------------------+----------+------------+----------+-------------
- pg_write_server_files     | postgres | {CONNECT}  | DATABASE | f
- pg_read_all_stats         | postgres | {CONNECT}  | DATABASE | f
- postgres                  | postgres | {CONNECT}  | DATABASE | t
+    r.rolname, datname, r.rolcanlogin; 
+	
 
 
-
-
-
---schema privileges 
+-- report name : schema_privs_role
+-- summary of schema privileges for each role and schema combination
+-- showing which roles have 'CREATE' and 'USAGE' privileges on each schema in the current PostgreSQL database. 
 SELECT
     r.rolname,
     current_database() AS catalog_name,
@@ -60,17 +56,14 @@ WHERE
     has_schema_privilege(r.rolname, n.nspname, 'CREATE,USAGE')
     AND n.nspname NOT LIKE 'pg_temp%'
     AND n.nspowner <> r.oid;
-
-          rolname          | catalog_name |    schema_name     | level  | database_name |     privs      | rolcanlogin
----------------------------+--------------+--------------------+--------+---------------+----------------+-------------
- pg_monitor                | postgres     | pg_catalog         | SCHEMA | DATABASE      | {USAGE}        | f
- pg_monitor                | postgres     | public             | SCHEMA | DATABASE      | {CREATE,USAGE} | f
- pg_monitor                | postgres     | information_schema | SCHEMA | DATABASE      | {USAGE}        | f
- pg_read_all_settings      | postgres     | pg_catalog         | SCHEMA | DATABASE      | {USAGE}        | f
-
-
-
---- schema privileges 1 
+	
+	
+	
+	
+	
+-- report name : role_specific_privs
+-- identify and list database roles (owners) that have specific privileges (CREATE and USAGE) on schemas in the current database.
+-- includes information about the database, schema, and whether the role can log in. 
 SELECT
     r.rolname,
     current_database() AS catalog_name,
@@ -86,15 +79,13 @@ JOIN
 WHERE
     has_schema_privilege(r.rolname, c.schema_name, 'CREATE,USAGE')
     AND c.schema_name NOT LIKE 'pg_temp%';
-
- rolname  | catalog_name |    schema_name     | level  | database_name |  privilege   | rolcanlogin
-----------+--------------+--------------------+--------+---------------+--------------+-------------
- postgres | postgres     | pg_toast           | SCHEMA | DATABASE      | SCHEMA OWNER | t
- postgres | postgres     | pg_toast_temp_1    | SCHEMA | DATABASE      | SCHEMA OWNER | t
-
-
-
--- Table Owner Privileges 
+	
+	
+	
+-- report name : role_priv_tables
+-- identify and list the owners of tables in the database, along with their privileges. 
+-- It checks whether a role has the privilege to use tables in certain schemas and excludes system schemas from consideration.
+-- includes information about the database, table, and whether the role can log in.
 SELECT
     r.rolname,
     current_database() AS catalog_name,
@@ -113,13 +104,13 @@ WHERE
     n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
     AND c.relkind = 'r'
     AND has_schema_privilege(r.rolname, n.oid, 'USAGE');
+	
+	
 
- rolname | catalog_name | database_name | table_name | level | privilege | rolcanlogin
----------+--------------+---------------+------------+-------+-----------+-------------
-(0 rows)
-
-
--- Non Owner Privileges
+-- report name : role_specific_privs_table
+-- identify and list the roles that have specific privileges on tables in the database.
+-- It checks for a set of privileges on tables in non-system schemas while excluding cases where the role owns the table. 
+-- includes information about the database, table, and whether the role can log in.
 SELECT
     r.rolname,
     current_database() AS catalog_name,
@@ -152,14 +143,13 @@ WHERE
     AND has_table_privilege(r.rolname, c.oid, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
     AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
     AND c.relowner <> r.oid;
+	
+	
 
-rolname | catalog_name | database_name | table_name | level | privileges | rolcanlogin
----------+--------------+---------------+------------+-------+------------+-------------
-(0 rows)
-
-
-
--- View privileges
+-- report name : views_ownership_usage_privs
+-- identify and list the roles that have the privilege to use (or access) views in the database.
+-- checks for schema usage privilege on views in non-system schemas while excluding system schemas and includes information about the database, view, and whether the role can log in. 
+-- The query specifically focuses on view ownership and usage privileges.
 SELECT
   r.rolname,
   current_database() AS current_db,
@@ -178,16 +168,13 @@ WHERE
   n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
   AND c.relkind = 'v'
   AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE');
-
-rolname | current_db | object_type | object_name | object_kind | object_owner | rolcanlogin
----------+------------+-------------+-------------+-------------+--------------+-------------
-(0 rows)
-
-
-
-
-
--- non owner permissions
+  
+  
+  
+-- report name : view_privs_role
+-- identify and list the roles that have specific privileges on views in the database.
+-- checks for schema usage privilege on views in non-system schemas while excluding system schemas and includes information about the database, view, and whether the role can log in. 
+-- constructs an array of view privileges for each role.
 SELECT
   r.rolname,
   current_database() AS current_db,
@@ -217,16 +204,13 @@ WHERE
   AND c.relkind = 'v'
   AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
   AND c.relowner <> r.oid;
-
- rolname | current_db | object_type | object_name | object_kind | object_owner | object_privileges | rolcanlogin
----------+------------+-------------+-------------+-------------+--------------+-------------------+-------------
-(0 rows)
-
-
-
-
-
--- sequence privileges
+  
+  
+  
+-- report name : sequence_ownership_usage_privs
+-- identify and list the roles that have specific privileges (SELECT and UPDATE) on sequences in the database.
+-- checks for schema usage privilege on sequences in non-system schemas while excluding system schemas and includes information about the database, sequence, and whether the role can log in. 
+-- focuses on sequence ownership and usage privileges.
 SELECT
   r.rolname,
   current_database() AS current_db,
@@ -246,15 +230,12 @@ WHERE
   AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
   AND c.relowner = r.oid;
 
- rolname | current_db | object_type | object_name | object_kind | object_owner | rolcanlogin
----------+------------+-------------+-------------+-------------+--------------+-------------
-(0 rows)
 
 
-
-
-
--- sequence with no privs
+-- report name : roles_specific_privileges_sequences
+-- identify and list the roles that have both SELECT and UPDATE privileges on sequences in the database. 
+-- It filters out sequences in specific schemas, focuses on sequences, and includes information about the database, sequence, privileges, and whether the role can log in.
+-- includes roles with both SELECT and UPDATE privileges on sequences.
 WITH Privileges AS (
     SELECT
         r.rolname AS role_name,
@@ -289,17 +270,14 @@ FROM
     Privileges
 WHERE
     ARRAY[select_priv, update_priv] IS NOT NULL;
-
-role_name | database_name | object_type | object_name | privilege_type | privileges | can_login
------------+---------------+-------------+-------------+----------------+------------+-----------
-(0 rows)
-
-
-
-
-
-
--- foreign data wrappers owner privs
+	
+	
+	
+	
+-- report name : roles_privs_fdw
+-- identify and list the roles that have the USAGE privilege on foreign data wrappers (FDWs) in the database.
+-- focuses on FDW ownership and USAGE privileges. 
+-- which roles have the authority to use FDWs in the database.
 SELECT
     r.rolname AS role_name,
     current_database() AS database_name,
@@ -314,16 +292,13 @@ JOIN
     pg_catalog.pg_roles r ON fdw.fdwowner = r.oid
 WHERE
     has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE');
-
- role_name | database_name | object_type | object_name | privilege_type | privilege_name | can_login
------------+---------------+-------------+-------------+----------------+----------------+-----------
-(0 rows)
-
-
-
-
-
--- FDW Non Owner
+	
+	
+	
+-- report name : roles_login_fdw
+-- identify and list the roles that have the USAGE privilege on foreign data wrappers (FDWs) in the database. 
+-- constructs an array of privileges for each role and excludes cases where the role owns the FDW.
+-- which roles can use FDWs in the database and whether they can log in
 SELECT
     r.rolname AS role_name,
     current_database() AS database_name,
@@ -339,14 +314,13 @@ JOIN
 WHERE
     has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE')
     AND fdwowner <> r.oid;
- role_name | database_name | object_type | object_name | privilege_type | privileges | can_login
------------+---------------+-------------+-------------+----------------+------------+-----------
-(0 rows)
-
-
-
-
--- Language privs
+	
+	
+	
+-- file name : roles_privs_language
+-- identify and list the roles that have the USAGE privilege on languages in the database. 
+-- constructs an array of privileges for each role based on the USAGE privilege on specific languages. 
+-- understand which roles can use particular languages for writing stored procedures and functions in the database and whether they can log in.
 SELECT
     r.rolname AS role_name,
     current_database() AS database_name,
@@ -359,13 +333,13 @@ FROM
     pg_catalog.pg_language l
 JOIN
     pg_catalog.pg_roles r ON has_language_privilege(r.rolname, l.lanname, 'USAGE');
-        role_name         | database_name | object_type | object_name | privilege_type | privileges | can_login
----------------------------+---------------+-------------+-------------+----------------+------------+-----------
- postgres                  | postgres      | DATABASE    | internal    | LANGUAGE       | {USAGE}    | t
- postgres                  | postgres      | DATABASE    | c           | LANGUAGE       | {USAGE}    | t
- postgres                  | postgres      | DATABASE    | sql         | LANGUAGE       | {USAGE}    | t
-
-
+	
+	
+	
+	
+-- report name : function_privs_elevated
+-- identify database roles that have the privilege to execute functions with elevated privileges in the database.
+-- functions defined with specific security considerations and provides information about the role, the functions, and whether the role can log in.
 -- Get function privileges with elevated permissions with sexurity identifiers.
 WITH elevated_perm_procs AS (
     SELECT
@@ -431,15 +405,14 @@ FROM
     func_with_elevated_privileges_and_db func
 JOIN
     pg_roles r ON has_function_privilege(r.rolname, func.f, 'execute') = true;
-
- rolname | dbname | level | f | object_type | privileges | rolcanlogin
----------+--------+-------+---+-------------+------------+-------------
-(0 rows)
-
-
-
-
--- End functions with elevated permissions
+	
+	
+	
+	
+-- report name : functions_ownership_roles
+-- identify and list the database roles that own functions in the database
+-- provides information about the roles, the functions they own, and whether the roles can log in
+-- useful for understanding the ownership of functions within the database.
 SELECT
     r.rolname AS role_name,
     current_database() AS database_name,
@@ -454,6 +427,3 @@ JOIN
     pg_namespace n ON p.pronamespace = n.oid
 JOIN
     pg_roles r ON r.oid = p.proowner;
-
- role_name | database_name | object_type | object_name | privilege_type | privileges | rolcanlogin
----------+--------+-------+---+-------------+------------+-------------
