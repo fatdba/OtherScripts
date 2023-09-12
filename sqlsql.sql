@@ -7,7 +7,8 @@ SELECT
     'FDW OWNER' AS privilege_name,
     r.rolcanlogin AS can_login
 FROM
-    pg_catalog.pg_foreign_data_wrapper
+    pg_catalog.pg_foreign_data_wrapper fdw
+JOIN
+    pg_catalog.pg_roles r ON fdw.fdwowner = r.oid
 WHERE
-    has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE')
-    AND fdwowner = r.oid;
+    has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE');
