@@ -31,3 +31,9 @@ FROM (
     AND s.schema_owner <> u.rolname
 ) AS c
 JOIN pg_roles r ON r.rolname = c.rolname;
+
+
+ERROR:  column u.rolname does not exist
+LINE 10:   SELECT s.schema_name, s.catalog_name, u.rolname, s.schema_...
+                                                 ^
+HINT:  Perhaps you meant to reference the column "u.usename".
