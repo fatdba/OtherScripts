@@ -24,7 +24,20 @@ WHERE
     datname = current_database()
 GROUP BY
     r.rolname, datname, r.rolcanlogin; 
-	
+
+
+          rolname          | datname  | privileges |  level   | rolcanlogin
+---------------------------+----------+------------+----------+-------------
+ pg_write_server_files     | postgres | {CONNECT}  | DATABASE | f
+ pg_read_all_stats         | postgres | {CONNECT}  | DATABASE | f
+ postgres                  | postgres | {CONNECT}  | DATABASE | t
+
+
+
+
+
+
+
 
 
 -- report name : schema_privs_role
@@ -57,6 +70,12 @@ WHERE
     AND n.nspname NOT LIKE 'pg_temp%'
     AND n.nspowner <> r.oid;
 	
+          rolname          | catalog_name |    schema_name     | level  | database_name |     privs      | rolcanlogin
+---------------------------+--------------+--------------------+--------+---------------+----------------+-------------
+ pg_monitor                | postgres     | pg_catalog         | SCHEMA | DATABASE      | {USAGE}        | f
+	
+	
+	
 	
 	
 	
@@ -79,7 +98,16 @@ JOIN
 WHERE
     has_schema_privilege(r.rolname, c.schema_name, 'CREATE,USAGE')
     AND c.schema_name NOT LIKE 'pg_temp%';
-	
+
+ rolname  | catalog_name |    schema_name     | level  | database_name |  privilege   | rolcanlogin
+----------+--------------+--------------------+--------+---------------+--------------+-------------
+ postgres | postgres     | pg_toast           | SCHEMA | DATABASE      | SCHEMA OWNER | t
+ 
+ 
+ 
+ 
+ 
+ 
 	
 	
 -- report name : role_priv_tables
@@ -104,7 +132,17 @@ WHERE
     n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
     AND c.relkind = 'r'
     AND has_schema_privilege(r.rolname, n.oid, 'USAGE');
-	
+
+ rolname | catalog_name | database_name | table_name | level | privilege | rolcanlogin
+---------+--------------+---------------+------------+-------+-----------+-------------
+(0 rows)
+
+
+
+
+
+
+
 	
 
 -- report name : role_specific_privs_table
@@ -143,7 +181,15 @@ WHERE
     AND has_table_privilege(r.rolname, c.oid, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
     AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
     AND c.relowner <> r.oid;
-	
+
+ rolname | catalog_name | database_name | table_name | level | privileges | rolcanlogin
+---------+--------------+---------------+------------+-------+------------+-------------
+(0 rows)
+
+
+
+
+
 	
 
 -- report name : views_ownership_usage_privs
@@ -168,7 +214,17 @@ WHERE
   n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
   AND c.relkind = 'v'
   AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE');
-  
+ 
+ rolname | current_db | object_type | object_name | object_kind | object_owner | rolcanlogin
+---------+------------+-------------+-------------+-------------+--------------+-------------
+(0 rows)
+
+
+
+
+
+
+
   
   
 -- report name : view_privs_role
@@ -204,7 +260,17 @@ WHERE
   AND c.relkind = 'v'
   AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
   AND c.relowner <> r.oid;
-  
+
+ rolname | current_db | object_type | object_name | object_kind | object_owner | object_privileges | rolcanlogin
+---------+------------+-------------+-------------+-------------+--------------+-------------------+-------------
+(0 rows)
+
+
+
+
+
+
+
   
   
 -- report name : sequence_ownership_usage_privs
@@ -229,6 +295,15 @@ WHERE
   AND has_table_privilege(r.rolname, c.oid, 'SELECT, UPDATE')
   AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
   AND c.relowner = r.oid;
+
+ rolname | current_db | object_type | object_name | object_kind | object_owner | rolcanlogin
+---------+------------+-------------+-------------+-------------+--------------+-------------
+(0 rows)
+
+
+
+
+
 
 
 
@@ -270,7 +345,17 @@ FROM
     Privileges
 WHERE
     ARRAY[select_priv, update_priv] IS NOT NULL;
-	
+
+ role_name | database_name | object_type | object_name | privilege_type | privileges | can_login
+-----------+---------------+-------------+-------------+----------------+------------+-----------
+(0 rows)
+
+
+
+
+
+
+
 	
 	
 	
@@ -292,7 +377,15 @@ JOIN
     pg_catalog.pg_roles r ON fdw.fdwowner = r.oid
 WHERE
     has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE');
-	
+
+ role_name | database_name | object_type | object_name | privilege_type | privilege_name | can_login
+-----------+---------------+-------------+-------------+----------------+----------------+-----------
+(0 rows)
+
+
+
+
+
 	
 	
 -- report name : roles_login_fdw
@@ -315,7 +408,31 @@ WHERE
     has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE')
     AND fdwowner <> r.oid;
 	
+SELECT
+    r.rolname AS role_name,
+    current_database() AS database_name,
+    'DATABASE' AS object_type,
+    fdwname AS object_name,
+    'FDW' AS privilege_type,
+    ARRAY[CASE WHEN has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE') THEN 'USAGE' ELSE NULL END] AS privileges,
+    r.rolcanlogin AS can_login
+FROM
+    pg_catalog.pg_foreign_data_wrapper
+JOIN
+    pg_catalog.pg_roles r ON fdwowner = r.oid
+WHERE
+    has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE')
+    AND fdwowner <> r.oid;
+
+ role_name | database_name | object_type | object_name | privilege_type | privileges | can_login
+-----------+---------------+-------------+-------------+----------------+------------+-----------
+(0 rows)
+
+
+
+
 	
+
 	
 -- file name : roles_privs_language
 -- identify and list the roles that have the USAGE privilege on languages in the database. 
@@ -334,7 +451,14 @@ FROM
 JOIN
     pg_catalog.pg_roles r ON has_language_privilege(r.rolname, l.lanname, 'USAGE');
 	
-	
+        role_name         | database_name | object_type | object_name | privilege_type | privileges | can_login
+---------------------------+---------------+-------------+-------------+----------------+------------+-----------
+ postgres                  | postgres      | DATABASE    | internal    | LANGUAGE       | {USAGE}    | t
+ 
+ 
+ 
+ 
+ 
 	
 	
 -- report name : function_privs_elevated
@@ -405,7 +529,15 @@ FROM
     func_with_elevated_privileges_and_db func
 JOIN
     pg_roles r ON has_function_privilege(r.rolname, func.f, 'execute') = true;
-	
+
+ rolname | dbname | level | f | object_type | privileges | rolcanlogin
+---------+--------+-------+---+-------------+------------+-------------
+(0 rows)
+
+
+
+
+
 	
 	
 	
@@ -419,7 +551,7 @@ SELECT
     'DATABASE' AS object_type,
     n.nspname || '.' || p.proname AS object_name,
     'FUNCTION' AS privilege_type,
-    'FUNCTION OWNER' AS privilege_name,
+    'FUNCTION OWNER' AS privilege_name,\
     r.rolcanlogin AS can_login
 FROM
     pg_proc p
@@ -427,3 +559,9 @@ JOIN
     pg_namespace n ON p.pronamespace = n.oid
 JOIN
     pg_roles r ON r.oid = p.proowner;
+	
+	
+ role_name | database_name | object_type |                       object_name                       | privilege_type | privilege_name | can_login
+-----------+---------------+-------------+---------------------------------------------------------+----------------+----------------+-----------
+ postgres  | postgres      | DATABASE    | pg_catalog.boolin                                       | FUNCTION       | FUNCTION OWNER | t
+ postgres  | postgres      | DATABASE    | pg_catalog.boolout                                      | FUNCTION       | FUNCTION OWNER | t
