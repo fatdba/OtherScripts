@@ -52,3 +52,8 @@ SELECT r.rolname, datname, array(
 FROM pg_database c
 JOIN pg_roles r ON has_database_privilege(r.rolname, c.oid, 'CONNECT,CREATE,TEMPORARY,TEMP')
 WHERE datname = current_database();
+
+
+ERROR:  syntax error at or near ")"
+LINE 14: )) AS result
+          ^
