@@ -1,53 +1,33 @@
-# ... (Previous code)
+def generate_csv_and_pdf_reports_for_the_drift_tables(secrets_client, reporting_db_secret_arn, table_names_list, scan_id):
+    """
+    Function to generate CSV and pdf reports from the tables in the drift reporting database.
+    secrets_client: Parameter to connect to the Drift Reporting DB.
+    table_names_list: List of all the drift tables to generate CSV and PDF reports from.
+    scan_id: Represents the Scan ID for this current lambda invocation. Scan ID will be incremented with each invocation.
+    """
+    # ... (Previous code)
 
-# Function to generate a CSV report (modified to handle empty results)
-def generate_csv_report(data, csv_filename):
-    if not data:
-        # If data is empty, create an empty CSV report
-        with open(csv_filename, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(["No data available"])
+    # Looping Through Tables
+    for each_table in table_names_list:
+        print(each_table)
+        # Get table data
+        sql = f"""
+        SELECT * FROM {each_table} WHERE scanid = {str(scan_id)}::varchar;
+        """
+        print("before_run_query_using_secrets")
+        result = pgs.run_query_using_secrets(secrets_client, reporting_db_secret_arn, sql)
+        print("after_run_query_using_secrets")
+        print(result)
+        print("printresult")
+        result_list = [each._asdict() for each in result]
 
-    else:
-        # If data is not empty, create a CSV report with the data
-        with open(csv_filename, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(data[0].keys())  # Write headers
-            for row in data:
-                writer.writerow(row.values())
+        # Check if result is empty
+        if not result_list:
+            # If the result is empty, create empty CSV and PDF reports
+            header_list = ["No data available"]
+            result_list = [{"No data available": ""}]
+        else:
+            # If the result is not empty, parse it as before
+            header_list = [str(i) for i in result[0]._asdict().keys()]
 
-# Function to generate a PDF report (modified to handle empty results)
-def generate_pdf_report(data, pdf_filename):
-    from fpdf import FPDF
-
-    class PDF(FPDF):
-        def header(self):
-            self.set_font('Arial', 'B', 12)
-            self.cell(0, 10, 'Database Report', 0, 1, 'C')
-
-        def footer(self):
-            self.set_y(-15)
-            self.set_font('Arial', 'I', 8)
-            self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
-
-    if not data:
-        # If data is empty, create an empty PDF report
-        pdf = PDF()
-        pdf.add_page()
-        pdf.set_font('Arial', '', 12)
-        pdf.cell(0, 10, "No data available", 0, 1, 'C')
-        pdf.output(pdf_filename)
-
-    else:
-        # If data is not empty, create a PDF report with the data
-        pdf = PDF()
-        pdf.add_page()
-        pdf.set_font('Arial', '', 12)
-        for row in data:
-            for key, value in row.items():
-                pdf.cell(70, 10, f'{key}:', 0)
-                pdf.cell(0, 10, str(value), 0, 1)
-        pdf.output(pdf_filename)
-
-# ... (Rest of the code remains unchanged)
-
+        # ... (Rest of the code remains unchanged)
