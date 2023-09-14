@@ -502,7 +502,7 @@ def get_role_priv_tables_list(scan_id, acct_id, role_priv_tables_list, result) :
             'rolcanlogin':each_dict.get("rolcanlogin")
         })
 
-    return get_role_priv_tables_list
+    return role_priv_tables_list
     
    
 # Added by Prashant 
@@ -523,7 +523,7 @@ def get_role_specific_priv_tables_list(scan_id, acct_id, role_specific_priv_tabl
             'rolcanlogin':each_dict.get("rolcanlogin")
         })
 
-    return get_role_specific_priv_tables_list
+    return role_specific_priv_tables_list
 
 
 # Added by Prashant 
@@ -544,7 +544,7 @@ def get_views_ownership_usage_privs_list(scan_id, acct_id, views_ownership_usage
             'rolcanlogin':each_dict.get("rolcanlogin")
         })
 
-    return get_views_ownership_usage_privs_list
+    return views_ownership_usage_privs_list
     
 
 
@@ -566,7 +566,7 @@ def get_view_privs_role_list(scan_id, acct_id, view_privs_role_list, result) :
             'rolcanlogin':each_dict.get("rolcanlogin")
         })
 
-    return get_view_privs_role_list
+    return view_privs_role_list
     
   
 
@@ -587,7 +587,7 @@ def get_sequence_ownership_usage_privs_list(scan_id, acct_id, sequence_ownership
             'rolcanlogin':each_dict.get("rolcanlogin")
         })
 
-    return get_sequence_ownership_usage_privs_list
+    return sequence_ownership_usage_privs_list
 
 
 def get_roles_specific_privileges_sequences_list(scan_id, acct_id, roles_specific_privileges_sequences_list, result) :
@@ -607,7 +607,7 @@ def get_roles_specific_privileges_sequences_list(scan_id, acct_id, roles_specifi
             'can_login':each_dict.get("can_login")
         })
 
-    return get_roles_specific_privileges_sequences_list
+    return roles_specific_privileges_sequences_list
     
     
 
@@ -628,7 +628,7 @@ def get_roles_privs_fdw_list(scan_id, acct_id, roles_privs_fdw_list, result) :
             'can_login':each_dict.get("can_login")
         })
 
-    return get_roles_privs_fdw_list
+    return roles_privs_fdw_list
     
   
 def get_roles_login_fdw_list(scan_id, acct_id, roles_login_fdw_list, result) :
@@ -648,7 +648,7 @@ def get_roles_login_fdw_list(scan_id, acct_id, roles_login_fdw_list, result) :
             'can_login':each_dict.get("can_login")
         })
 
-    return get_roles_login_fdw_list  
+    return roles_login_fdw_list  
     
 
 def get_roles_privs_language_list(scan_id, acct_id, roles_privs_language_list, result) :
@@ -659,7 +659,7 @@ def get_roles_privs_language_list(scan_id, acct_id, roles_privs_language_list, r
         roles_privs_language_list.append({
             'ScanId':scan_id,
             'AccountID': acct_id,
-            'rolname':each_dict.get("rolname"),
+            'role_name':each_dict.get("role_name"),
             'database_name':each_dict.get("database_name"),
             'object_type':each_dict.get("object_type"),
             'object_name':each_dict.get("object_name"),
@@ -668,27 +668,27 @@ def get_roles_privs_language_list(scan_id, acct_id, roles_privs_language_list, r
             'can_login':each_dict.get("can_login")
         })
 
-    return get_roles_privs_language_list 
+    return roles_privs_language_list 
     
 
-def get_function_privs_elevated_list(scan_id, acct_id, function_privs_elevated_list, result) :
-    print("function_privs_elevated_list 0",result)
-    print("function_privs_elevated_list 1",function_privs_elevated_list)
-    for each in result:
-        each_dict = each._asdict()
-        function_privs_elevated_list.append({
-            'ScanId':scan_id,
-            'AccountID': acct_id,
-            'rolname':each_dict.get("rolname"),
-            'dbname':each_dict.get("dbname"),
-            'level':each_dict.get("level"),
-            'f':each_dict.get("f"),
-            'object_type':each_dict.get("object_type"),
-            'privileges':each_dict.get("privileges"),
-            'rolcanlogin':each_dict.get("rolcanlogin")
-        })
-
-    return get_function_privs_elevated_list 
+#def get_function_privs_elevated_list(scan_id, acct_id, function_privs_elevated_list, result) :
+#    print("function_privs_elevated_list 0",result)
+#    print("function_privs_elevated_list 1",function_privs_elevated_list)
+#    for each in result:
+#        each_dict = each._asdict()
+#        function_privs_elevated_list.append({
+#            'ScanId':scan_id,
+#            'AccountID': acct_id,
+#            'rolname':each_dict.get("rolname"),
+#            'dbname':each_dict.get("dbname"),
+#            'level':each_dict.get("level"),
+#            'f':each_dict.get("f"),
+#            'object_type':each_dict.get("object_type"),
+#            'privileges':each_dict.get("privileges"),
+#            'rolcanlogin':each_dict.get("rolcanlogin")
+#        })
+#
+#    return get_function_privs_elevated_list 
 
 
 def get_functions_ownership_roles_list(scan_id, acct_id, functions_ownership_roles_list, result) :
@@ -708,7 +708,7 @@ def get_functions_ownership_roles_list(scan_id, acct_id, functions_ownership_rol
             'can_login':each_dict.get("can_login")
         })
 
-    return get_functions_ownership_roles_list 
+    return functions_ownership_roles_list 
     
 
 def get_audit_roles_list(scan_id, acct_id, rds_identifier, audit_roles_list, result, dbname):
@@ -1052,7 +1052,7 @@ def lambda_handler(event, context):
         # added by prashant 
         roles_privs_language_list = []
         # added by prashant
-        function_privs_elevated_list = []
+        #function_privs_elevated_list = []
         # added by Prashant
         functions_ownership_roles_list = []
         while index < len(rds_secrets_list):
@@ -1648,83 +1648,83 @@ def lambda_handler(event, context):
                         print("result_type21: ", type(result[0]))
                         print("result: ", result[0]._asdict())
                         
-                    # Main SQL to get schema privs role list report 
-                    sql = f"""
-                    WITH elevated_perm_procs AS (
-                        SELECT
-                            row_number() OVER (ORDER BY p.oid) AS row_num,
-                            p.oid,
-                            nspname,
-                            proname,
-                            format_type(unnest(proargtypes)::oid, NULL) AS format_type
-                        FROM
-                            pg_proc p
-                        JOIN
-                            pg_namespace n ON p.pronamespace = n.oid
-                        JOIN
-                            pg_authid a ON a.oid = p.proowner
-                        WHERE
-                            prosecdef OR NOT proconfig IS NULL
-                    ),
-                    func_with_elevated_privileges AS (
-                        SELECT
-                            oid,
-                            nspname,
-                            proname,
-                            array_to_string(array_agg(format_type), ',') AS proc_param
-                        FROM
-                            elevated_perm_procs
-                        GROUP BY
-                            oid,
-                            nspname,
-                            proname
-                        UNION
-                        SELECT
-                            p.oid,
-                            nspname,
-                            proname,
-                            ' ' AS proc_param
-                        FROM
-                            pg_proc p
-                        JOIN
-                            pg_namespace n ON p.pronamespace = n.oid
-                        JOIN
-                            pg_authid a ON a.oid = p.proowner
-                        WHERE
-                            (prosecdef OR NOT proconfig IS NULL)
-                            AND p.oid NOT IN (SELECT oid FROM elevated_perm_procs)
-                    ),
-                    func_with_elevated_privileges_and_db AS (
-                        SELECT
-                            current_database() AS dbname,
-                            'DATABASE' AS level,
-                            nspname || '.' || proname || '(' || proc_param || ')' AS f
-                        FROM
-                            func_with_elevated_privileges
-                        WHERE
-                            nspname NOT IN ('dbms_scheduler', 'dbms_session', 'pg_catalog', 'sys', 'utl_http')
-                    )
-                    SELECT
-                        r.rolname,
-                        func.*,
-                        'FUNCTION' AS object_type,
-                        'Elevated Privileges' AS privileges,
-                        r.rolcanlogin
-                    FROM
-                        func_with_elevated_privileges_and_db func
-                    JOIN
-                        pg_roles r ON has_function_privilege(r.rolname, func.f, 'execute') = true;
-                    """
-                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    print("function_privs_elevated_list 2", result)
-                    get_function_privs_elevated_list(scan_id, acct_id, function_privs_elevated_list, result)
-                    #print("role_priv_table",role_priv_tables)
-                    if result:
-                        print("result_type22: ", type(result[0]))
-                        print("result: ", result[0]._asdict())
+                    ## Main SQL to get schema privs role list report 
+                    #sql = f"""
+                    #WITH elevated_perm_procs AS (
+                    #    SELECT
+                    #        row_number() OVER (ORDER BY p.oid) AS row_num,
+                    #        p.oid,
+                    #        nspname,
+                    #        proname,
+                    #        format_type(unnest(proargtypes)::oid, NULL) AS format_type
+                    #    FROM
+                    #        pg_proc p
+                    #    JOIN
+                    #        pg_namespace n ON p.pronamespace = n.oid
+                    #    JOIN
+                    #        pg_authid a ON a.oid = p.proowner
+                    #    WHERE
+                    #        prosecdef OR NOT proconfig IS NULL
+                    #),
+                    #func_with_elevated_privileges AS (
+                    #    SELECT
+                    #        oid,
+                    #        nspname,
+                    #        proname,
+                    #        array_to_string(array_agg(format_type), ',') AS proc_param
+                    #    FROM
+                    #        elevated_perm_procs
+                    #    GROUP BY
+                    #        oid,
+                    #        nspname,
+                    #        proname
+                    #    UNION
+                    #    SELECT
+                    #        p.oid,
+                    #        nspname,
+                    #        proname,
+                    #        ' ' AS proc_param
+                    #    FROM
+                    #        pg_proc p
+                    #    JOIN
+                    #        pg_namespace n ON p.pronamespace = n.oid
+                    #    JOIN
+                    #        pg_authid a ON a.oid = p.proowner
+                    #    WHERE
+                    #        (prosecdef OR NOT proconfig IS NULL)
+                    #        AND p.oid NOT IN (SELECT oid FROM elevated_perm_procs)
+                    #),
+                    #func_with_elevated_privileges_and_db AS (
+                    #    SELECT
+                    #        current_database() AS dbname,
+                    #        'DATABASE' AS level,
+                    #        nspname || '.' || proname || '(' || proc_param || ')' AS f
+                    #    FROM
+                    #        func_with_elevated_privileges
+                    #    WHERE
+                    #        nspname NOT IN ('dbms_scheduler', 'dbms_session', 'pg_catalog', 'sys', 'utl_http')
+                    #)
+                    #SELECT
+                    #    r.rolname,
+                    #    func.*,
+                    #    'FUNCTION' AS object_type,
+                    #    'Elevated Privileges' AS privileges,
+                    #    r.rolcanlogin
+                    #FROM
+                    #    func_with_elevated_privileges_and_db func
+                    #JOIN
+                    #    pg_roles r ON has_function_privilege(r.rolname, func.f, 'execute') = true;
+                    #"""
+                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    #print("function_privs_elevated_list 2", result)
+                    #get_function_privs_elevated_list(scan_id, acct_id, function_privs_elevated_list, result)
+                    ##print("role_priv_table",role_priv_tables)
+                    #if result:
+                    #    print("result_type22: ", type(result[0]))
+                    #    print("result: ", result[0]._asdict())
 
 
-                    # Main SQL to get schema privs role list report 
+                    ## Main SQL to get schema privs role list report 
                     sql = f"""
                     SELECT
                         r.rolname AS role_name,
@@ -1739,14 +1739,16 @@ def lambda_handler(event, context):
                     JOIN
                         pg_namespace n ON p.pronamespace = n.oid
                     JOIN
-                        pg_roles r ON r.oid = p.proowner;
+                        pg_roles r ON r.oid = p.proowner
+                    WHERE 
+                        n.nspname <> 'pg_catalog';
                     """
                     result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
                     print("functions_ownership_roles_list 2", result)
                     get_functions_ownership_roles_list(scan_id, acct_id, functions_ownership_roles_list, result)
                     #print("role_priv_table",role_priv_tables)
                     if result:
-                        print("result_type23: ", type(result[0]))
+                        print("result_type22: ", type(result[0]))
                         print("result: ", result[0]._asdict())
                         
 
@@ -1812,10 +1814,10 @@ def lambda_handler(event, context):
             parameter_list = roles_privs_language_list[0].keys()
             create_or_alter_table(parameter_list, table_name="roles_privs_language_table")
             update_table(roles_privs_language_list, parameter_list, table_name="roles_privs_language_table")  
-        if function_privs_elevated_list:
-            parameter_list = function_privs_elevated_list[0].keys()
-            create_or_alter_table(parameter_list, table_name="function_privs_elevated_table")
-            update_table(function_privs_elevated_list, parameter_list, table_name="function_privs_elevated_table") 
+        #if function_privs_elevated_list:
+        #    parameter_list = function_privs_elevated_list[0].keys()
+        #    create_or_alter_table(parameter_list, table_name="function_privs_elevated_table")
+        #    update_table(function_privs_elevated_list, parameter_list, table_name="function_privs_elevated_table") 
         if functions_ownership_roles_list:
             parameter_list = functions_ownership_roles_list[0].keys()
             create_or_alter_table(parameter_list, table_name="functions_ownership_roles_table")
@@ -1863,8 +1865,8 @@ def lambda_handler(event, context):
             table_names_list.append("roles_login_fdw_table")
         if roles_privs_language_list:
             table_names_list.append("roles_privs_language_table")
-        if function_privs_elevated_list:
-            table_names_list.append("function_privs_elevated_table") 
+        #if function_privs_elevated_list:
+        #   table_names_list.append("function_privs_elevated_table") 
         if functions_ownership_roles_list:
             table_names_list.append("functions_ownership_roles_table")            
     elif flag == 1:
@@ -1895,8 +1897,8 @@ def lambda_handler(event, context):
             table_names_list.append("roles_login_fdw_table")
         if roles_privs_language_list:
             table_names_list.append("roles_privs_language_table")
-        if function_privs_elevated_list:
-            table_names_list.append("function_privs_elevated_table")
+        #if function_privs_elevated_list:
+        #    table_names_list.append("function_privs_elevated_table")
         if functions_ownership_roles_list:
             table_names_list.append("functions_ownership_roles_table")
     else:
