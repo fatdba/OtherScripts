@@ -1,6 +1,14 @@
-passing  -- role_priv_tables_list
-failing --- get_role_specific_priv_tables_list
-passing -- get_views_ownership_usage_privs_list
-failing --- get_view_privs_role_list
-failing -- get_sequence_ownership_usage_privs_list
-
+SELECT
+    r.rolname AS role_name,
+    current_database() AS database_name,
+    'DATABASE' AS object_type,
+    n.nspname || '.' || p.proname AS object_name,
+    'FUNCTION' AS privilege_type,
+    'FUNCTION OWNER' AS privilege_name,\
+    r.rolcanlogin AS can_login
+FROM
+    pg_proc p
+JOIN
+    pg_namespace n ON p.pronamespace = n.oid
+JOIN
+    pg_roles r ON r.oid = p.proowner;
