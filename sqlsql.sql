@@ -28,10 +28,11 @@ def generate_csv_and_pdf_reports_for_the_drift_tables(secrets_client, reporting_
         print("printresult")
         result_list = [each._asdict() for each in result]
 
-        # Always create CSV and PDF reports, even if the result is empty
         # Create an empty CSV file
-        header_list = [str(i) for i in result[0]._asdict().keys()]
-        Column_sizes = [font.getsize(str(i)) for i in result[0]._asdict().keys()]
+        header_list = []
+        if result:
+            header_list = [str(i) for i in result[0]._asdict().keys()]
+        Column_sizes = [font.getsize(str(i)) for i in header_list]
         file_name = str(each_table) + '_scan_' + str(scan_id) + '.csv'
         file_path = "/tmp/" + file_name
 
