@@ -1,5 +1,4 @@
-Error: Error in function call
-on modules/lambda_layer/main.tf line 10, in resource "aws_lambda_layer_version" "postgres_utils_layer":
-  source_code_hash    = filebase64sha256("${path.module}/postgres_utils/postgres_utils.zip")
-path.module is "modules/lambda_layer"
-Call to function "filebase64sha256" failed: open modules/lambda_layer/postgres_utils/postgres_utils.zip: no such file or directory.
+Error: Reference to undeclared input variable
+on main.tf line 19, in locals:
+  sg_ids = var.base_environment == "sandbox" ? ["sg-070ae1363fb30b366"] : ["sg-070ae1363fb30b366"]
+An input variable with the name "base_environment" has not been declared. This variable can be declared with a variable "base_environment" {} block.
