@@ -1,4 +1,6 @@
-Error: creating Lambda Function (edm-drift-detection-test-new): operation error Lambda: CreateFunction, https response error StatusCode: 400, RequestID: 7740e91b-058c-4e53-b4d9-585781bf940a, InvalidParameterValueException: Could not unzip uploaded file. Please check your file, then try to upload again.
-with module.edm_lambda["drift-detection-test-new"].aws_lambda_function.new_lambda
-on .terraform/modules/edm_lambda/main.tf line 231, in resource "aws_lambda_function" "new_lambda":
-resource "aws_lambda_function" "new_lambda" {
+{
+  "errorMessage": "Unable to import module 'drift_detection.lambda_function': No module named 'drift_detection'",
+  "errorType": "Runtime.ImportModuleError",
+  "requestId": "7e82c9b7-730d-4455-afc6-88fc149b73ba",
+  "stackTrace": []
+}
