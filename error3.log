@@ -1,5 +1,5 @@
-variable "base_environment" {
-  description = "The base environment for your Lambda functions"
-  type        = string
-  default     = "sandbox" # You can change the default value as needed
-}
+Error: Invalid index
+on main.tf line 67, in module "edm_lambda":
+  iam_policy_arn_to_attach  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${each.value["policy"]}"
+each.value is object with 4 attributes
+The given key does not identify an element in this collection value.
