@@ -1,14 +1,5 @@
-SELECT
-    r.rolname AS role_name,
-    current_database() AS database_name,
-    'DATABASE' AS object_type,
-    n.nspname || '.' || p.proname AS object_name,
-    'FUNCTION' AS privilege_type,
-    'FUNCTION OWNER' AS privilege_name,\
-    r.rolcanlogin AS can_login
-FROM
-    pg_proc p
-JOIN
-    pg_namespace n ON p.pronamespace = n.oid
-JOIN
-    pg_roles r ON r.oid = p.proowner;
+Error: Error in function call
+on modules/lambda_layer/main.tf line 10, in resource "aws_lambda_layer_version" "postgres_utils_layer":
+  source_code_hash    = filebase64sha256("${path.module}/postgres_utils/postgres_utils.zip")
+path.module is "modules/lambda_layer"
+Call to function "filebase64sha256" failed: open modules/lambda_layer/postgres_utils/postgres_utils.zip: no such file or directory.
