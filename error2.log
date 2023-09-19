@@ -1,21 +1,5 @@
-Initializing Terraform Cloud...
-Initializing modules...
-Downloading git::ssh://git@github.info53.com/fitb-edm-dba/adithya_lambdas.git?ref=feature%2Fcreate_lambda for edm_lambda...
-- lambda_layers in modules/lambda_layer
-╷
-│ Error: Failed to download module
-│ 
-│   on main.tf line 55:
-│   55: module "edm_lambda" {
-│ 
-│ Could not download module "edm_lambda" (main.tf:55) source code from
-│ "git::ssh://git@github.info53.com/fitb-edm-dba/adithya_lambdas.git?ref=feature%2Fcreate_lambda":
-│ error downloading
-│ 'ssh://git@github.info53.com/fitb-edm-dba/adithya_lambdas.git?ref=feature%2Fcreate_lambda':
-│ /usr/bin/git exited with 128: Cloning into
-│ '.terraform/modules/edm_lambda'...
-│ ssh: connect to host github.info53.com port 22: Connection timed out
-│ fatal: Could not read from remote repository.
-│ 
-│ Please make sure you have the correct access rights
-│ and the repository exists.
+Error: Invalid index
+on main.tf line 67, in module "edm_lambda":
+  iam_policy_arn_to_attach  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${each.value["policy"]}"
+each.value is object with 4 attributes
+The given key does not identify an element in this collection value.
