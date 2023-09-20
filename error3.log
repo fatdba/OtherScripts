@@ -1,4 +1,70 @@
-Error: Instance cannot be destroyed
-on .terraform/modules/edm_lambda/main.tf line 33:
-resource "aws_iam_role" "lambda_role" {
-Resource module.edm_lambda["drift-detection-test-new-experiment-core"].aws_iam_role.lambda_role[0] has lifecycle.prevent_destroy set, but the plan calls for this resource to be destroyed. To avoid this error and continue with the plan, either disable lifecycle.prevent_destroy or reduce the scope of the plan using the -target flag.
+##################################################################################
+# DATA INPUTS
+##################################################################################
+data "aws_region" "current" {}
+
+##################################################################################
+# RESOURCES
+##################################################################################
+
+resource "aws_cloudwatch_log_group" "cloudwatch_log_group" {
+  name              = "/aws/lambda/${var.function_name}"
+  retention_in_days = 14
+}
+
+output "execution_role_vale" {
+  value = "${local.create_execution_role}"
+}
+
+resource "aws_lambda_function" "new_lambda" {
+  function_name    = var.function_name
+  filename         = var.file_name
+  handler          = var.handler
+  memory_size      = 10240
+  role             = aws_iam_role.lambda_role[0].arn
+  runtime          = var.python_runtime
+  source_code_hash = filebase64sha256(var.file_name)
+  timeout          = var.timeout
+  layers           = length(var.layer_arns) > 0 ? var.layer_arns : []
+  kms_key_arn      = local.kms_key_arn
+  reserved_concurrent_executions = var.reserved_concurrent_executions
+  vpc_config {
+    security_group_ids = var.security_group_ids
+    subnet_ids         = [for value in var.subnet_ids : value]
+  }
+  dynamic "environment" {
+    for_each = local.environment_map
+    content {
+      variables = environment.value
+    }
+  }
+  tracing_config {
+    mode = "Active"
+  }
+  ephemeral_storage {
+    size = 10240
+  }
+  depends_on = [aws_iam_role.lambda_role]
+}
+
+# lambda insights
+resource "aws_iam_role_policy_attachment" "insights_policy" {
+  role       = local.lambda_execution_role_name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy"
+  depends_on = [aws_iam_role.lambda_role]
+}
+
+# lambda Xray
+resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
+  role       = local.lambda_execution_role_name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
+  depends_on = [aws_iam_role.lambda_role]
+}
+
+resource "aws_lambda_permission" "lambda_permissions" {
+  for_each      = toset(var.invoke_function_principal)
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.new_lambda.function_name
+  principal     = each.value
+  depends_on = [aws_iam_role.lambda_role]
+}
