@@ -1,26 +1,4 @@
+Error: Instance cannot be destroyed
+on .terraform/modules/edm_lambda/main.tf line 33:
 resource "aws_iam_role" "lambda_role" {
-  count      = (local.create_execution_role == "true") ? 1 : 0
-  name       = local.lambda_execution_role_name
-  permissions_boundary = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/pubcloud/AppTeamIAMBoundary"
-  assume_role_policy   = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-
-}
-EOF
-
-  # Prevent the IAM role from being destroyed
-  lifecycle {
-    prevent_destroy = true
-  }
-}
+Resource module.edm_lambda["drift-detection-test-new-experiment-core"].aws_iam_role.lambda_role[0] has lifecycle.prevent_destroy set, but the plan calls for this resource to be destroyed. To avoid this error and continue with the plan, either disable lifecycle.prevent_destroy or reduce the scope of the plan using the -target flag.
