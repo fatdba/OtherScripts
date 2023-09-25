@@ -1,31 +1,3 @@
-Skip to content
- Enterprise
-Search or jump to…
-Pull requests
-Issues
-Explore
- 
-@prashant-dixit 
-fitb-edm-dba
-/
-prashant_lambdas
-Public
-Code
-Issues
-Pull requests
-Projects
-Wiki
-Security
-Insights
-Settings
-prashant_lambdas/main.tf
-@prashant-dixit
-prashant-dixit Update main.tf
-Latest commit d287f37 4 days ago
- History
- 1 contributor
-281 lines (254 sloc)  8.17 KB
-
 ##################################################################################
 # DATA INPUTS
 ##################################################################################
@@ -307,16 +279,3 @@ resource "aws_lambda_permission" "lambda_permissions" {
   principal     = each.value
   depends_on = [aws_iam_role.lambda_role]
 }
-Footer5/3 Bank
-5/3 Bank
-5/3 Bank
-© 2023 GitHub, Inc.
-Footer navigation
-Help
-Support
-API
-Training
-Blog
-About
-GitHub Enterprise Server 3.7.11
-You have no unread notifications
