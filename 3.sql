@@ -812,10 +812,13 @@ def generate_csv_and_pdf_reports_for_the_drift_tables(secrets_client, reporting_
         print("after_run_query_using_secrets")
         print(result)
         print("printresult")
+
         result_list = [each._asdict() for each in result]
-        #Parse Db table data and create CSV and PDF files
-        header_list = [str(i) for i in result[0]._asdict().keys()]
-        Column_sizes = [font.getsize(str(i)) for i in result[0]._asdict().keys()]
+        if result:
+            #Parse Db table data and create CSV and PDF files
+            header_list = [str(i) for i in result[0]._asdict().keys()]
+            Column_sizes = [font.getsize(str(i)) for i in result[0]._asdict().keys()]
+
 
         file_name = str(each_table)+'_scan_'+str(scan_id)+'.csv'
         file_path = "/tmp/"+file_name
@@ -1837,72 +1840,9 @@ def lambda_handler(event, context):
 
     #updates summary table
     update_table(summary_list, summary_table_parameter_list, summary_table_name)
-    if flag == 2:
-        table_names_list = ["public_role_privileges", "audit_role_privileges",summary_table_name,"instances_info","snapshots_info"]
-        if user_roles_list:
-            table_names_list.append("user_roles")
-        if database_permissions_list:
-            table_names_list.append("database_permissions")
-        if schema_privs_role_list:
-            table_names_list.append("schema_privs_role")
-        if role_specific_privs_list:
-            table_names_list.append("role_specific_privs")
-        if role_priv_tables_list:
-            table_names_list.append("role_priv_tables")
-        if role_specific_priv_tables_list:
-            table_names_list.append("role_specific_priv_tables")
-        if views_ownership_usage_privs_list:
-            table_names_list.append("views_ownership_usage_privs_table")
-        if view_privs_role_list:
-            table_names_list.append("view_privs_role_table")
-        if sequence_ownership_usage_privs_list:
-            table_names_list.append("sequence_ownership_usage_privs_table")
-        if roles_specific_privileges_sequences_list:
-            table_names_list.append("roles_specific_privileges_sequences_table")
-        if roles_privs_fdw_list:
-            table_names_list.append("roles_privs_fdw_table")
-        if roles_login_fdw_list:
-            table_names_list.append("roles_login_fdw_table")
-        if roles_privs_language_list:
-            table_names_list.append("roles_privs_language_table")
-        #if function_privs_elevated_list:
-        #   table_names_list.append("function_privs_elevated_table") 
-        if functions_ownership_roles_list:
-            table_names_list.append("functions_ownership_roles_table")            
-    elif flag == 1:
-        table_names_list = ["audit_role_privileges",summary_table_name,"instances_info","snapshots_info"]
-        if user_roles_list:
-            table_names_list.append("user_roles")
-        if database_permissions_list:
-            table_names_list.append("database_permissions")
-        if schema_privs_role_list:
-            table_names_list.append("schema_privs_role")
-        if role_specific_privs_list:
-            table_names_list.append("role_specific_privs")
-        if role_priv_tables_list:
-            table_names_list.append("role_priv_tables")
-        if role_specific_priv_tables_list:
-            table_names_list.append("role_specific_priv_tables")
-        if views_ownership_usage_privs_list:
-            table_names_list.append("views_ownership_usage_privs_table")
-        if view_privs_role_list:
-            table_names_list.append("view_privs_role_table")
-        if sequence_ownership_usage_privs_list:
-            table_names_list.append("sequence_ownership_usage_privs_table")
-        if roles_specific_privileges_sequences_list:
-            table_names_list.append("roles_specific_privileges_sequences_table")
-        if roles_privs_fdw_list:
-            table_names_list.append("roles_privs_fdw_table")
-        if roles_login_fdw_list:
-            table_names_list.append("roles_login_fdw_table")
-        if roles_privs_language_list:
-            table_names_list.append("roles_privs_language_table")
-        #if function_privs_elevated_list:
-        #    table_names_list.append("function_privs_elevated_table")
-        if functions_ownership_roles_list:
-            table_names_list.append("functions_ownership_roles_table")
-    else:
-        table_names_list = [summary_table_name,"instances_info","snapshots_info"]
+
+    table_names_list = ["public_role_privileges", "audit_role_privileges",summary_table_name,"instances_info","snapshots_info","user_roles","database_permissions","schema_privs_role","role_specific_privs","role_priv_tables","role_specific_priv_tables","views_ownership_usage_privs_table","view_privs_role_table","sequence_ownership_usage_privs_table","roles_specific_privileges_sequences_table","roles_privs_fdw_table","roles_login_fdw_table","roles_privs_language_table","functions_ownership_roles_table"]
+
     #generate CSV and pdf files of the tables for each scan
     print("flag:", flag)
     print(table_names_list)
