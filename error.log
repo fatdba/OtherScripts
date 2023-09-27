@@ -827,7 +827,9 @@ def generate_csv_and_pdf_reports_for_the_drift_tables(secrets_client, reporting_
         try:
             result = pgs.run_query_using_secrets(secrets_client, reporting_db_secret_arn, sql)
         except Exception as e:
+            print("after_run_query_using_secrets exception",e)
             result = []
+
         print("after_run_query_using_secrets")
         print(result)
         print("printresult")
@@ -956,15 +958,15 @@ def lambda_handler(event, context):
         summary_list.append({"ScanID":scan_id, "AccountID":"ALL", "AccountName":"ALL", "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
     #print(len(acct_ids_dict))
     print(len(acct_ids))
-    acct_ids = ["472131731879"]
+    #acct_ids = ["472131731879"]
 
     #loop through list of target accounts
     for acct_id in acct_ids:
         # Cross account assume role
         try:
             #Formulating the role arn to assume
-            #master_role_arn_to_assume = "arn:aws:iam::{}:role/edm/{}".format(acct_id, "LambdaCrossAccountFunctionRole")
-            master_role_arn_to_assume = "arn:aws:iam::{}:role/{}".format(acct_id, "EDMCrossAccountRole")
+            master_role_arn_to_assume = "arn:aws:iam::{}:role/edm/{}".format(acct_id, "LambdaCrossAccountFunctionRole")
+            #master_role_arn_to_assume = "arn:aws:iam::{}:role/{}".format(acct_id, "EDMCrossAccountRole")
             #Getting the assume role credentials on target account
             org_sts_token = get_assume_role_session(master_role_arn_to_assume)
             #If any error with summary list refer Comment above the summary_table_parameter_list
