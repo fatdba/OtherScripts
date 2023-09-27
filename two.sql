@@ -800,6 +800,22 @@ def generate_csv_and_pdf_reports_for_the_drift_tables(secrets_client, reporting_
     #using font lib for calculating Sizes for pdf files
     font = ImageFont.load_default()
 
+
+    default_parameters = {
+        "audit_role_privileges":["id","recordedtime","scanid","rolname","tablespacename","dbname","object_name","object_type","privileges","level","canlogin","accountid","dbindentifier"],
+        "functions_ownership_roles_table":["id","recordedtime","scanid","accountid","role_name","database_name","object_type","object_name","privilege_type","privilege_name","can_login"],
+        "roles_privs_language_table":["id","recordedtime","scanid","accountid","role_name","database_name","object_type","object_name","privilege_type","privileges","can_login"],
+        "database_permissions":["id","recordedtime","scanid","accountid","rolname","datname","privileges","level","rolcanlogin"],
+        "views_ownership_usage_privs_table":["id","recordedtime","scanid","accountid","rolname","current_db","object_type","object_name","object_kind","object_owner","rolcanlogin"],
+        "role_specific_privs":["id","recordedtime","scanid","accountid","rolname","catalog_name","schema_name","level","database_name","privilege","rolcanlogin"],
+        "schema_privs_role":["id","recordedtime","scanid","accountid","rolname","catalog_name","schema_name","level","database_name","privs","rolcanlogin"],
+        "instances_info":["id","recordedtime","scanid","accountid","dbinstanceid","secrethost","secretport","multiaz","engine","EngineVersion","cluster_encrypted","database_name","BackupRetentionPeriod","PubliclyAccessible","instance_encrypted"],
+        "snapshots_info":["id","recordedtime","scanid","accountid","dbinstanceid","dbclusteridentifier","DBSnapshotIdentifier_Instance_or_Cluster","DBSnapshotEncrypted_Instance_or_Cluster","DBSnapshotType_Instance_or_Cluster"],
+        "user_roles":["id","recordedtime","scanid","accountid","user_role_id","user_role_name","role_can_login","other_role_id","other_role_name","has_replication_perm","has_createrole_perm","has_createdb_perm"],
+        "public_role_privileges":["id","recordedtime","scanid","AccountID","DbIdentifier","dbname","catalog_name","schema_name","level","rolname","datname","privileges","lanname"],
+        "connection_summary":["ScanID", "AccountID", "AccountName", "RDSIdentifier", "SecretARN", "Summary"],
+    }
+
     #Looping Through Tables
     for each_table in table_names_list:
         print(each_table)
@@ -822,8 +838,8 @@ def generate_csv_and_pdf_reports_for_the_drift_tables(secrets_client, reporting_
             header_list = [str(i) for i in result[0]._asdict().keys()]
             Column_sizes = [font.getsize(str(i)) for i in result[0]._asdict().keys()]
         else:
-            header_list = [each_table]
-            Column_sizes = [font.getsize(str(each_table))]
+            header_list = default_parameters.get(each_table,[each_table])
+            Column_sizes = [font.getsize(str(i)) for i in header_list]
 
         file_name = str(each_table)+'_scan_'+str(scan_id)+'.csv'
         file_path = "/tmp/"+file_name
@@ -931,7 +947,8 @@ def lambda_handler(event, context):
 
     #Get list of account ID's based on environment
     #acct_ids_dict, error = get_account_ids()
-    acct_ids, error = get_account_ids()
+    acct_ids_dict, error = get_account_ids()
+    acct_ids = list(acct_ids_dict.keys())
 
     # acct_ids = ["728226656595"]
     if error != "":
@@ -947,7 +964,7 @@ def lambda_handler(event, context):
         try:
             #Formulating the role arn to assume
             #master_role_arn_to_assume = "arn:aws:iam::{}:role/edm/{}".format(acct_id, "LambdaCrossAccountFunctionRole")
-            master_role_arn_to_assume = "arn:aws:iam::{}:role/{}".format(acct_id, "EDMCrossAccountRole")
+            master_role_arn_to_assume = "arn:aws:iam::{}:role/{}".format(acct_id, "LambdaCrossAccountFunctionRole")
             #Getting the assume role credentials on target account
             org_sts_token = get_assume_role_session(master_role_arn_to_assume)
             #If any error with summary list refer Comment above the summary_table_parameter_list
