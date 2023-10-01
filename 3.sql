@@ -79,7 +79,7 @@ def create_or_alter_table(parameter_list, table_name):
         """
     status_code,status=run_query(secrets_client,reporting_db_secret_arn,sql)
         
-def parse_instances_info(rds_client, acct_id, acct_ids_dict, scan_id):
+def parse_instances_info(rds_client, acct_id, scan_id):
     """
     Function to get and parse the Instrance info from the target accounts
     rds_client: Boto3 rds assume role client method to get rds instances data from target account.
@@ -101,7 +101,7 @@ def parse_instances_info(rds_client, acct_id, acct_ids_dict, scan_id):
         error = f"""Exception Caught - Error = {client_error}"""
         print("exception1 ****")
         #If any error with summary list refer Comment above the summary_table_parameter_list
-        rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
+        rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
 
     # Variable to hold the list of rds instances
     instances=[]
@@ -196,10 +196,10 @@ def parse_instances_info(rds_client, acct_id, acct_ids_dict, scan_id):
                 error = f"""Error while parsing the rds db response - {error}"""
                 if 'DBClusterIdentifier' in rds_instances['DBInstances'][index]:
                     #If any error with summary list refer Comment above the summary_table_parameter_list
-                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": str(rds_instances['DBInstances'][index]['DBClusterIdentifier'].rsplit('-',1)[0]), "SecretARN":"NA", "Summary":error})
+                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": str(rds_instances['DBInstances'][index]['DBClusterIdentifier'].rsplit('-',1)[0]), "SecretARN":"NA", "Summary":error})
                 else:
                     #If any error with summary list refer Comment above the summary_table_parameter_list
-                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": rds_instances['DBInstances'][index]['DBInstanceIdentifier'], "SecretARN":"NA", "Summary":error})
+                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": rds_instances['DBInstances'][index]['DBInstanceIdentifier'], "SecretARN":"NA", "Summary":error})
                     
             index=index+1
         #create and update instances info table
@@ -211,14 +211,14 @@ def parse_instances_info(rds_client, acct_id, acct_ids_dict, scan_id):
         except Exception as error:
             error = f"""Error While creating or updaing the instances_info table - {error}"""
             #If any error with summary list refer Comment above the summary_table_parameter_list
-            rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
+            rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
     else:
         error = "There are No postgres or aurora-postgresql databases in this account"
         #If any error with summary list refer Comment above the summary_table_parameter_list
-        rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
+        rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
     return rds_list, rds_summary_list
     
-def parse_snapshots_info(rds_client, acct_id, acct_ids_dict, scan_id):
+def parse_snapshots_info(rds_client, acct_id, scan_id):
     """
     Function to get and parse the snapshots info from the target accounts
     rds_client: Boto3 rds assume role client method to get rds instances and it's snapshots data from target account.
@@ -239,7 +239,7 @@ def parse_snapshots_info(rds_client, acct_id, acct_ids_dict, scan_id):
     except (botocore.exceptions.BotoCoreError,boto3.exceptions.Boto3Error,botocore.exceptions.ClientError) as client_error:
         error = f"""Error While getting the rds instances info for describing snapshots - {client_error}"""
         #If any error with summary list refer Comment above the summary_table_parameter_list
-        rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
+        rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
         return rds_snapshots_list, rds_summary_list
 
     index = 0
@@ -256,7 +256,7 @@ def parse_snapshots_info(rds_client, acct_id, acct_ids_dict, scan_id):
                 except (botocore.exceptions.BotoCoreError,boto3.exceptions.Boto3Error,botocore.exceptions.ClientError) as client_error:
                     error = f"""Error While describing snapshots - {client_error}"""
                     #If any error with summary list refer Comment above the summary_table_parameter_list
-                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": str(rds_instances['DBInstances'][index]['DBClusterIdentifier'].rsplit('-',1)[0]), "SecretARN":"NA", "Summary":error})
+                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": str(rds_instances['DBInstances'][index]['DBClusterIdentifier'].rsplit('-',1)[0]), "SecretARN":"NA", "Summary":error})
                 try:
                     if snapshots_response["DBClusterSnapshots"]:
                         for each in snapshots_response["DBClusterSnapshots"]:
@@ -272,7 +272,7 @@ def parse_snapshots_info(rds_client, acct_id, acct_ids_dict, scan_id):
                 except Exception as error:
                     error = f"""Error While parsing snapshots info - {error}"""
                     #If any error with summary list refer Comment above the summary_table_parameter_list
-                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": str(rds_instances['DBInstances'][index]['DBClusterIdentifier'].rsplit('-',1)[0]), "SecretARN":"NA", "Summary":error})
+                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": str(rds_instances['DBInstances'][index]['DBClusterIdentifier'].rsplit('-',1)[0]), "SecretARN":"NA", "Summary":error})
                 
         
             else:
@@ -286,7 +286,7 @@ def parse_snapshots_info(rds_client, acct_id, acct_ids_dict, scan_id):
                 except (botocore.exceptions.BotoCoreError,boto3.exceptions.Boto3Error,botocore.exceptions.ClientError) as client_error:
                     error = f"""Error While describing snapshots - {client_error}"""
                     #If any error with summary list refer Comment above the summary_table_parameter_list
-                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": rds_instances['DBInstances'][index]['DBInstanceIdentifier'], "SecretARN":"NA", "Summary":error})
+                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": rds_instances['DBInstances'][index]['DBInstanceIdentifier'], "SecretARN":"NA", "Summary":error})
                 try:
                     if snapshots_response["DBSnapshots"]:
                         for each in snapshots_response["DBSnapshots"]:
@@ -302,7 +302,7 @@ def parse_snapshots_info(rds_client, acct_id, acct_ids_dict, scan_id):
                 except Exception as error:
                     error = f"""Error While parsing snapshots info - {error}"""
                     #If any error with summary list refer Comment above the summary_table_parameter_list
-                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": rds_instances['DBInstances'][index]['DBInstanceIdentifier'], "SecretARN":"NA", "Summary":error})
+                    rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": rds_instances['DBInstances'][index]['DBInstanceIdentifier'], "SecretARN":"NA", "Summary":error})
                 
             index=index+1
         
@@ -315,7 +315,7 @@ def parse_snapshots_info(rds_client, acct_id, acct_ids_dict, scan_id):
         except Exception as error:
             error = f"""Error While Creating or updaing the snapshots_info table - {error}"""
             #If any error with summary list refer Comment above the summary_table_parameter_list
-            rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
+            rds_summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
             
     
     return rds_snapshots_list, rds_summary_list
@@ -800,6 +800,22 @@ def generate_csv_and_pdf_reports_for_the_drift_tables(secrets_client, reporting_
     #using font lib for calculating Sizes for pdf files
     font = ImageFont.load_default()
 
+
+    default_parameters = {
+        "audit_role_privileges":["id","recordedtime","scanid","rolname","tablespacename","dbname","object_name","object_type","privileges","level","canlogin","accountid","dbindentifier"],
+        "functions_ownership_roles_table":["id","recordedtime","scanid","accountid","role_name","database_name","object_type","object_name","privilege_type","privilege_name","can_login"],
+        "roles_privs_language_table":["id","recordedtime","scanid","accountid","role_name","database_name","object_type","object_name","privilege_type","privileges","can_login"],
+        "database_permissions":["id","recordedtime","scanid","accountid","rolname","datname","privileges","level","rolcanlogin"],
+        "views_ownership_usage_privs_table":["id","recordedtime","scanid","accountid","rolname","current_db","object_type","object_name","object_kind","object_owner","rolcanlogin"],
+        "role_specific_privs":["id","recordedtime","scanid","accountid","rolname","catalog_name","schema_name","level","database_name","privilege","rolcanlogin"],
+        "schema_privs_role":["id","recordedtime","scanid","accountid","rolname","catalog_name","schema_name","level","database_name","privs","rolcanlogin"],
+        "instances_info":["id","recordedtime","scanid","accountid","dbinstanceid","secrethost","secretport","multiaz","engine","EngineVersion","cluster_encrypted","database_name","BackupRetentionPeriod","PubliclyAccessible","instance_encrypted"],
+        "snapshots_info":["id","recordedtime","scanid","accountid","dbinstanceid","dbclusteridentifier","DBSnapshotIdentifier_Instance_or_Cluster","DBSnapshotEncrypted_Instance_or_Cluster","DBSnapshotType_Instance_or_Cluster"],
+        "user_roles":["id","recordedtime","scanid","accountid","user_role_id","user_role_name","role_can_login","other_role_id","other_role_name","has_replication_perm","has_createrole_perm","has_createdb_perm"],
+        "public_role_privileges":["id","recordedtime","scanid","AccountID","DbIdentifier","dbname","catalog_name","schema_name","level","rolname","datname","privileges","lanname"],
+        "connection_summary":["ScanID", "AccountID", "AccountName", "RDSIdentifier", "SecretARN", "Summary"],
+    }
+
     #Looping Through Tables
     for each_table in table_names_list:
         print(each_table)
@@ -808,7 +824,12 @@ def generate_csv_and_pdf_reports_for_the_drift_tables(secrets_client, reporting_
         select*from {each_table} where scanid = {str(scan_id)}::varchar;
         """
         print("before_run_query_using_secrets")
-        result = pgs.run_query_using_secrets(secrets_client, reporting_db_secret_arn, sql)
+        try:
+            result = pgs.run_query_using_secrets(secrets_client, reporting_db_secret_arn, sql)
+        except Exception as e:
+            print("after_run_query_using_secrets exception",e)
+            result = []
+
         print("after_run_query_using_secrets")
         print(result)
         print("printresult")
@@ -818,7 +839,9 @@ def generate_csv_and_pdf_reports_for_the_drift_tables(secrets_client, reporting_
             #Parse Db table data and create CSV and PDF files
             header_list = [str(i) for i in result[0]._asdict().keys()]
             Column_sizes = [font.getsize(str(i)) for i in result[0]._asdict().keys()]
-
+        else:
+            header_list = default_parameters.get(each_table,[each_table])
+            Column_sizes = [font.getsize(str(i)) for i in header_list]
 
         file_name = str(each_table)+'_scan_'+str(scan_id)+'.csv'
         file_path = "/tmp/"+file_name
@@ -925,26 +948,33 @@ def lambda_handler(event, context):
     create_or_alter_table(summary_table_parameter_list, summary_table_name) 
 
     #Get list of account ID's based on environment
+    #acct_ids_dict, error = get_account_ids()
     acct_ids_dict, error = get_account_ids()
+    acct_ids = list(acct_ids_dict.keys())
+
     # acct_ids = ["728226656595"]
     if error != "":
         #If any error with summary list refer Comment above the summary_table_parameter_list
         summary_list.append({"ScanID":scan_id, "AccountID":"ALL", "AccountName":"ALL", "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
-    print(len(acct_ids_dict))
+    #print(len(acct_ids_dict))
+    #print(len(acct_ids))
+    print("acct_ids",acct_ids,len(acct_ids))
+    #acct_ids = ["472131731879"]
 
     #loop through list of target accounts
-    for acct_id in acct_ids_dict.keys():
+    for acct_id in acct_ids:
         # Cross account assume role
         try:
             #Formulating the role arn to assume
             master_role_arn_to_assume = "arn:aws:iam::{}:role/edm/{}".format(acct_id, "LambdaCrossAccountFunctionRole")
+            #master_role_arn_to_assume = "arn:aws:iam::{}:role/{}".format(acct_id, "EDMCrossAccountRole")
             #Getting the assume role credentials on target account
             org_sts_token = get_assume_role_session(master_role_arn_to_assume)
             #If any error with summary list refer Comment above the summary_table_parameter_list
-            summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":"Assume role connection successful"})
+            summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":"Assume role connection successful"})
         except ClientError as client_error:
             #If any error with summary list refer Comment above the summary_table_parameter_list
-            summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":"Error Assuming the role on target account"})
+            summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":"Error Assuming the role on target account"})
             logger.info("Exception Caught - Error = %s" %( client_error))
             print("exception4 $$$$$$$")
             continue
@@ -957,12 +987,12 @@ def lambda_handler(event, context):
         )
         
         # describe and parse rds instances response from target account
-        rds_list, rds_summary_list = parse_instances_info(rds_client, acct_id, acct_ids_dict, scan_id)
+        rds_list, rds_summary_list = parse_instances_info(rds_client, acct_id, scan_id)
         if rds_summary_list:
             summary_list.extend(rds_summary_list)
         
         # describe and parse rds snapshots response from target account
-        rds_snapshots_list, rds_summary_list = parse_snapshots_info(rds_client, acct_id, acct_ids_dict, scan_id)
+        rds_snapshots_list, rds_summary_list = parse_snapshots_info(rds_client, acct_id, scan_id)
         if rds_summary_list:
             summary_list.extend(rds_summary_list)
         
@@ -976,7 +1006,7 @@ def lambda_handler(event, context):
         #get secret names list of dictionaries
         secret_names, error = get_secrets_list(secrets_client)
         if error != "":
-            summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
+            summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": "NA", "SecretARN":"NA", "Summary":error})
         # End getting the secret name and the arn to a list
         
         # Added by Prashant on 08-29-2023 
@@ -1017,9 +1047,9 @@ def lambda_handler(event, context):
                     rds_secrets_list[index]['DBAdminSecretARN'] = secret_names.get(k)
                     break
             if rds_secrets_list[index]['DBAdminSecretARN'] == "":
-                summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": rds_secrets_list[index]['DBInstanceID'], "SecretARN":"NA", "Summary":"No Secret found for the RDS in secret manager"})
+                summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": rds_secrets_list[index]['DBInstanceID'], "SecretARN":"NA", "Summary":"No Secret found for the RDS in secret manager"})
             else:
-                summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": rds_secrets_list[index]['DBInstanceID'], "SecretARN":rds_secrets_list[index]['DBAdminSecretARN'], "Summary":"Secret Found for the rds in secret manager"})
+                summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": rds_secrets_list[index]['DBInstanceID'], "SecretARN":rds_secrets_list[index]['DBAdminSecretARN'], "Summary":"Secret Found for the rds in secret manager"})
             index = index +1 
          
     
@@ -1071,12 +1101,12 @@ def lambda_handler(event, context):
                 # if query execution was unsuccessfull updates summary table with db admin secret didn't work
                 if status_code < 0:
                     rds_secrets_list[index]['DBAdminSecretPresent'] = "FALSE"
-                    summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": rds_secrets_list[index]['DBInstanceID'], "SecretARN":rds_secrets_list[index]['DBAdminSecretARN'], "Summary":"Unable to connect to the target Db with Secret"})
+                    summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": rds_secrets_list[index]['DBInstanceID'], "SecretARN":rds_secrets_list[index]['DBAdminSecretARN'], "Summary":"Unable to connect to the target Db with Secret"})
                 
                 #If query execution successfull runs the CIS sql scripts on target db for drifts.
                 else:
                     print("connection successful")
-                    summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "AccountName":acct_ids_dict.get(acct_id), "RDSIdentifier": rds_secrets_list[index]['DBInstanceID'], "SecretARN":rds_secrets_list[index]['DBAdminSecretARN'], "Summary":"Successfully Connected to db with Secret"})
+                    summary_list.append({"ScanID":scan_id, "AccountID":acct_id, "RDSIdentifier": rds_secrets_list[index]['DBInstanceID'], "SecretARN":rds_secrets_list[index]['DBAdminSecretARN'], "Summary":"Successfully Connected to db with Secret"})
                     rds_secrets_list[index]['DBAdminSecretPresent'] = "TRUE"
                     sql = f"""
                     select rolname,'ALL','ALL','ALL','ALL','SUPERUSER','SERVER',rolcanlogin from pg_roles where rolsuper is true;
@@ -1727,32 +1757,32 @@ def lambda_handler(event, context):
                     #    print("result: ", result[0]._asdict())
 
 
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname AS role_name,
-                    #    current_database() AS database_name,
-                    #    'DATABASE' AS object_type,
-                    #    n.nspname || '.' || p.proname AS object_name,
-                    #    'FUNCTION' AS privilege_type,
-                    #    'FUNCTION OWNER' AS privilege_name,\
-                    #    r.rolcanlogin AS can_login
-                    #FROM
-                    #    pg_proc p
-                    #JOIN
-                    #    pg_namespace n ON p.pronamespace = n.oid
-                    #JOIN
-                    #    pg_roles r ON r.oid = p.proowner
-                    #WHERE 
-                    #    n.nspname <> 'pg_catalog';
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("functions_ownership_roles_list 2", result)
-                    #get_functions_ownership_roles_list(scan_id, acct_id, functions_ownership_roles_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type22: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname AS role_name,
+                        current_database() AS database_name,
+                        'DATABASE' AS object_type,
+                        n.nspname || '.' || p.proname AS object_name,
+                        'FUNCTION' AS privilege_type,
+                        'FUNCTION OWNER' AS privilege_name,\
+                        r.rolcanlogin AS can_login
+                    FROM
+                        pg_proc p
+                    JOIN
+                        pg_namespace n ON p.pronamespace = n.oid
+                    JOIN
+                        pg_roles r ON r.oid = p.proowner
+                    WHERE 
+                        n.nspname <> 'pg_catalog';
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("functions_ownership_roles_list 2", result)
+                    get_functions_ownership_roles_list(scan_id, acct_id, functions_ownership_roles_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type22: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
                         
 
             else:
