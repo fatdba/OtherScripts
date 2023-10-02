@@ -1255,431 +1255,431 @@ def lambda_handler(event, context):
                         print("result_type8: ", type(result[0]))
                         print("result: ", result[0]._asdict())
 
-                    ## Added by Prashant
-                    ## Main SQL to get USER ROLE LIST report 
-                    ##GETTING USER ROLE LIST
-                    #sql = f"""
-                    #select a.oid as user_role_id
-                    #, a.rolname as user_role_name
-                    #, a.rolcanlogin as role_can_login
-                    #, b.roleid as other_role_id
-                    #, c.rolname as other_role_name
-                    #, a.rolreplication as has_replication_perm
-                    #, a.rolcreaterole as has_createrole_perm
-                    #, a.rolcreatedb as has_createdb_perm
-                    #from pg_roles a
-                    #inner join pg_auth_members b on a.oid=b.member
-                    #inner join pg_roles c on b.roleid=c.oid
-                    #WHERE
-                    #a.rolsuper = true
-                    #OR a.rolreplication = true
-                    #OR a.rolcreaterole = true
-                    #OR a.rolcreatedb = true;
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #user_roles_list = get_user_roles_list(scan_id, acct_id, user_roles_list, result)
-                    #if result:
-                    #    print("result_type9: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #    
-                    #
-                    ## Added by Prashant
-                    ## Main SQL to get database permissions list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname,
-                    #    datname,
-                    #    ARRAY_AGG(
-                    #        CASE
-                    #            WHEN has_database_privilege(r.rolname, c.oid, 'CONNECT') THEN 'CONNECT'
-                    #            WHEN has_database_privilege(r.rolname, c.oid, 'CREATE') THEN 'CREATE'
-                    #            WHEN has_database_privilege(r.rolname, c.oid, 'TEMPORARY') THEN 'TEMPORARY'
-                    #            WHEN has_database_privilege(r.rolname, c.oid, 'TEMP') THEN 'CONNECT'
-                    #            ELSE NULL
-                    #        END
-                    #    ) AS privileges,
-                    #    'DATABASE' AS level,
-                    #    r.rolcanlogin
-                    #FROM
-                    #    pg_database c
-                    #JOIN
-                    #    pg_roles r ON has_database_privilege(r.rolname, c.oid, 'CONNECT,CREATE,TEMPORARY,TEMP')
-                    #WHERE
-                    #    datname = current_database()
-                    #GROUP BY
-                    #    r.rolname, datname, r.rolcanlogin;
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #database_permissions_list = get_database_permissions_list(scan_id, acct_id, database_permissions_list, result)
-                    #if result:
-                    #    print("result_type10: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #    
-                    #
-                    ## Added by Prashant
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname,
-                    #    current_database() AS catalog_name,
-                    #    n.nspname AS schema_name,
-                    #    'SCHEMA' AS level,
-                    #    'DATABASE' AS database_name,
-                    #    (
-                    #        SELECT ARRAY_AGG(priv)
-                    #        FROM (
-                    #            SELECT
-                    #                CASE WHEN has_schema_privilege(r.rolname, n.nspname, 'CREATE') THEN 'CREATE' END AS priv
-                    #            UNION
-                    #            SELECT
-                    #                CASE WHEN has_schema_privilege(r.rolname, n.nspname, 'USAGE') THEN 'USAGE' END AS priv
-                    #        ) AS privs
-                    #        WHERE priv IS NOT NULL
-                    #    ) AS privs,
-                    #    r.rolcanlogin
-                    #FROM
-                    #    pg_namespace n
-                    #JOIN
-                    #    pg_roles r ON true
-                    #WHERE
-                    #    has_schema_privilege(r.rolname, n.nspname, 'CREATE,USAGE')
-                    #    AND n.nspname NOT LIKE 'pg_temp%'
-                    #    AND n.nspowner <> r.oid;
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #schema_privs_role_list = get_schema_privs_role_list(scan_id, acct_id, schema_privs_role_list, result)
-                    #if result:
-                    #    print("result_type11: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #
-                    #
-                    #
-                    ## Added by Prashant
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname,
-                    #    current_database() AS catalog_name,
-                    #    c.schema_name,
-                    #    'SCHEMA' AS level,
-                    #    'DATABASE' AS database_name,
-                    #    'SCHEMA OWNER' AS privilege,
-                    #    r.rolcanlogin
-                    #FROM
-                    #    information_schema.schemata c
-                    #JOIN
-                    #    pg_roles r ON c.schema_owner = r.rolname
-                    #WHERE
-                    #    has_schema_privilege(r.rolname, c.schema_name, 'CREATE,USAGE')
-                    #    AND c.schema_name NOT LIKE 'pg_temp%';
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #role_specific_privs_list = get_role_specific_privs_list(scan_id, acct_id, role_specific_privs_list, result)
-                    #if result:
-                    #    print("result_type12: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #
-                    #
-                    ## Added by Prashant
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname,
-                    #    current_database() AS catalog_name,
-                    #    'DATABASE' AS database_name,
-                    #    c.oid::regclass AS table_name,
-                    #    'TABLE' AS level,
-                    #    'TABLE OWNER' AS privilege,
-                    #    r.rolcanlogin
-                    #FROM
-                    #    pg_class c
-                    #JOIN
-                    #    pg_roles r ON c.relowner = r.oid
-                    #JOIN
-                    #    pg_namespace n ON c.relnamespace = n.oid
-                    #WHERE
-                    #    n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
-                    #    AND c.relkind = 'r'
-                    #    AND has_schema_privilege(r.rolname, n.oid, 'USAGE');
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("role_priv_tables_list 2", result)
-                    #get_role_priv_tables_list(scan_id, acct_id, role_priv_tables_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type13: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #    
-                    #    
-                    ## Added by Prashant
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname,
-                    #    current_database() AS catalog_name,
-                    #    'DATABASE' AS database_name,
-                    #    c.oid::regclass AS table_name,
-                    #    'TABLE' AS level,
-                    #    ARRAY(
-                    #        SELECT privs
-                    #        FROM unnest(ARRAY[
-                    #            (CASE WHEN has_table_privilege(r.rolname, c.oid, 'SELECT') THEN 'SELECT' ELSE NULL END),
-                    #            (CASE WHEN has_table_privilege(r.rolname, c.oid, 'INSERT') THEN 'INSERT' ELSE NULL END),
-                    #            (CASE WHEN has_table_privilege(r.rolname, c.oid, 'UPDATE') THEN 'UPDATE' ELSE NULL END),
-                    #            (CASE WHEN has_table_privilege(r.rolname, c.oid, 'DELETE') THEN 'DELETE' ELSE NULL END),
-                    #            (CASE WHEN has_table_privilege(r.rolname, c.oid, 'TRUNCATE') THEN 'TRUNCATE' ELSE NULL END),
-                    #            (CASE WHEN has_table_privilege(r.rolname, c.oid, 'REFERENCES') THEN 'REFERENCES' ELSE NULL END),
-                    #            (CASE WHEN has_table_privilege(r.rolname, c.oid, 'TRIGGER') THEN 'TRIGGER' ELSE NULL END)
-                    #        ]) AS privs
-                    #        WHERE privs IS NOT NULL
-                    #    ) AS privileges,
-                    #    r.rolcanlogin
-                    #FROM
-                    #    pg_class c
-                    #JOIN
-                    #    pg_roles r ON c.relowner = r.oid
-                    #JOIN
-                    #    pg_namespace n ON c.relnamespace = n.oid
-                    #WHERE
-                    #    n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
-                    #    AND c.relkind = 'r'
-                    #    AND has_table_privilege(r.rolname, c.oid, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
-                    #    AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
-                    #    AND c.relowner <> r.oid;
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("role_specific_priv_tables_list 2", result)
-                    #get_role_specific_priv_tables_list(scan_id, acct_id, role_specific_priv_tables_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type14: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #
-                    ## Added by Prashant
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #  r.rolname,
-                    #  current_database() AS current_db,
-                    #  'DATABASE' AS object_type,
-                    #  c.oid::regclass AS object_name,
-                    #  'VIEW' AS object_kind,
-                    #  'VIEW OWNER' AS object_owner,
-                    #  r.rolcanlogin
-                    #FROM
-                    #  pg_class c
-                    #JOIN
-                    #  pg_namespace n ON c.relnamespace = n.oid
-                    #JOIN
-                    #  pg_roles r ON c.relowner = r.oid
-                    #WHERE
-                    #  n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
-                    #  AND c.relkind = 'v'
-                    #  AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE');
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("views_ownership_usage_privs_list 2", result)
-                    #get_views_ownership_usage_privs_list(scan_id, acct_id, views_ownership_usage_privs_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type15: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict()) 
-                    #
-                    #
-                    ## Added by Prashant
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #  r.rolname,
-                    #  current_database() AS current_db,
-                    #  'DATABASE' AS object_type,
-                    #  c.oid::regclass AS object_name,
-                    #  'VIEW' AS object_kind,
-                    #  'VIEW OWNER' AS object_owner,
-                    #  ARRAY(
-                    #    SELECT privs
-                    #    FROM unnest(ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']) AS privs
-                    #    WHERE
-                    #      (privs = 'SELECT' AND has_table_privilege(r.rolname, c.oid, 'SELECT')) OR
-                    #      (privs = 'INSERT' AND has_table_privilege(r.rolname, c.oid, 'INSERT')) OR
-                    #      (privs = 'UPDATE' AND has_table_privilege(r.rolname, c.oid, 'UPDATE')) OR
-                    #      (privs = 'DELETE' AND has_table_privilege(r.rolname, c.oid, 'DELETE')) OR
-                    #      (privs = 'TRUNCATE' AND has_table_privilege(r.rolname, c.oid, 'TRUNCATE')) OR
-                    #      (privs = 'REFERENCES' AND has_table_privilege(r.rolname, c.oid, 'REFERENCES')) OR
-                    #      (privs = 'TRIGGER' AND has_table_privilege(r.rolname, c.oid, 'TRIGGER'))
-                    #  ) AS object_privileges,
-                    #  r.rolcanlogin
-                    #FROM
-                    #  pg_class c
-                    #  JOIN pg_namespace n ON c.relnamespace = n.oid
-                    #  JOIN pg_roles r ON c.relowner = r.oid
-                    #WHERE
-                    #  n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
-                    #  AND c.relkind = 'v'
-                    #  AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
-                    #  AND c.relowner <> r.oid;
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("view_privs_role_list 2", result)
-                    #get_view_privs_role_list(scan_id, acct_id, view_privs_role_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type16: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #
-                    #
-                    #                    # Added by Prashant
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #  r.rolname,
-                    #  current_database() AS current_db,
-                    #  'DATABASE' AS object_type,
-                    #  c.oid::regclass AS object_name,
-                    #  'SEQUENCE' AS object_kind,
-                    #  'SEQUENCE OWNER' AS object_owner,
-                    #  r.rolcanlogin
-                    #FROM
-                    #  pg_class c
-                    #  JOIN pg_namespace n ON c.relnamespace = n.oid
-                    #  JOIN pg_roles r ON c.relowner = r.oid
-                    #WHERE
-                    #  n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
-                    #  AND c.relkind = 'S'
-                    #  AND has_table_privilege(r.rolname, c.oid, 'SELECT, UPDATE')
-                    #  AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
-                    #  AND c.relowner = r.oid;
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("sequence_ownership_usage_privs_list 2", result)
-                    #get_sequence_ownership_usage_privs_list(scan_id, acct_id, sequence_ownership_usage_privs_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type17: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #
-                    #
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #WITH Privileges AS (
-                    #    SELECT
-                    #        r.rolname AS role_name,
-                    #        current_database() AS database_name,
-                    #        'DATABASE' AS object_type,
-                    #        c.oid::regclass AS object_name,
-                    #        'SEQUENCE' AS privilege_type,
-                    #        CASE WHEN has_table_privilege(r.rolname, c.oid, 'SELECT') THEN 'SELECT' ELSE NULL END AS select_priv,
-                    #        CASE WHEN has_table_privilege(r.rolname, c.oid, 'UPDATE') THEN 'UPDATE' ELSE NULL END AS update_priv,
-                    #        r.rolcanlogin AS can_login
-                    #    FROM
-                    #        pg_class c
-                    #    JOIN
-                    #        pg_namespace n ON c.relnamespace = n.oid
-                    #    JOIN
-                    #        pg_roles r ON r.oid = c.relowner
-                    #    WHERE
-                    #        n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
-                    #        AND c.relkind = 'S'
-                    #        AND has_table_privilege(r.rolname, c.oid, 'SELECT,UPDATE')
-                    #        AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
-                    #)
-                    #SELECT
-                    #    role_name,
-                    #    database_name,
-                    #    object_type,
-                    #    object_name,
-                    #    privilege_type,
-                    #    ARRAY_REMOVE(ARRAY[select_priv, update_priv], NULL) AS privileges,
-                    #    can_login
-                    #FROM
-                    #    Privileges
-                    #WHERE
-                    #    ARRAY[select_priv, update_priv] IS NOT NULL;
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("roles_specific_privileges_sequences_list 2", result)
-                    #get_roles_specific_privileges_sequences_list(scan_id, acct_id, roles_specific_privileges_sequences_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type18: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #    
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname AS role_name,
-                    #    current_database() AS database_name,
-                    #    'DATABASE' AS object_type,
-                    #    fdwname AS object_name,
-                    #    'FDW' AS privilege_type,
-                    #    'FDW OWNER' AS privilege_name,
-                    #    r.rolcanlogin AS can_login
-                    #FROM
-                    #    pg_catalog.pg_foreign_data_wrapper fdw
-                    #JOIN
-                    #    pg_catalog.pg_roles r ON fdw.fdwowner = r.oid
-                    #WHERE
-                    #    has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE');
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("roles_privs_fdw_list 2", result)
-                    #get_roles_privs_fdw_list(scan_id, acct_id, roles_privs_fdw_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type19: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #
-                    #
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname AS role_name,
-                    #    current_database() AS database_name,
-                    #    'DATABASE' AS object_type,
-                    #    fdwname AS object_name,
-                    #    'FDW' AS privilege_type,
-                    #    ARRAY[CASE WHEN has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE') THEN 'USAGE' ELSE NULL END] AS privileges,
-                    #    r.rolcanlogin AS can_login
-                    #FROM
-                    #    pg_catalog.pg_foreign_data_wrapper
-                    #JOIN
-                    #    pg_catalog.pg_roles r ON fdwowner = r.oid
-                    #WHERE
-                    #    has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE')
-                    #    AND fdwowner <> r.oid;
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("roles_login_fdw_list 2", result)
-                    #get_roles_login_fdw_list(scan_id, acct_id, roles_login_fdw_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type20: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #    
-                    #
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname AS role_name,
-                    #    current_database() AS database_name,
-                    #    'DATABASE' AS object_type,
-                    #    l.lanname AS object_name,
-                    #    'LANGUAGE' AS privilege_type,
-                    #    ARRAY[CASE WHEN has_language_privilege(r.rolname, l.lanname, 'USAGE') THEN 'USAGE' ELSE NULL END] AS privileges,
-                    #    r.rolcanlogin AS can_login
-                    #FROM
-                    #    pg_catalog.pg_language l
-                    #JOIN
-                    #    pg_catalog.pg_roles r ON has_language_privilege(r.rolname, l.lanname, 'USAGE');
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("roles_privs_language_list 2", result)
-                    #get_roles_privs_language_list(scan_id, acct_id, roles_privs_language_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type21: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                    #    
+                    # Added by Prashant
+                    # Main SQL to get USER ROLE LIST report 
+                    #GETTING USER ROLE LIST
+                    sql = f"""
+                    select a.oid as user_role_id
+                    , a.rolname as user_role_name
+                    , a.rolcanlogin as role_can_login
+                    , b.roleid as other_role_id
+                    , c.rolname as other_role_name
+                    , a.rolreplication as has_replication_perm
+                    , a.rolcreaterole as has_createrole_perm
+                    , a.rolcreatedb as has_createdb_perm
+                    from pg_roles a
+                    inner join pg_auth_members b on a.oid=b.member
+                    inner join pg_roles c on b.roleid=c.oid
+                    WHERE
+                    a.rolsuper = true
+                    OR a.rolreplication = true
+                    OR a.rolcreaterole = true
+                    OR a.rolcreatedb = true;
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    user_roles_list = get_user_roles_list(scan_id, acct_id, user_roles_list, result)
+                    if result:
+                        print("result_type9: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                        
+                    
+                    # Added by Prashant
+                    # Main SQL to get database permissions list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname,
+                        datname,
+                        ARRAY_AGG(
+                            CASE
+                                WHEN has_database_privilege(r.rolname, c.oid, 'CONNECT') THEN 'CONNECT'
+                                WHEN has_database_privilege(r.rolname, c.oid, 'CREATE') THEN 'CREATE'
+                                WHEN has_database_privilege(r.rolname, c.oid, 'TEMPORARY') THEN 'TEMPORARY'
+                                WHEN has_database_privilege(r.rolname, c.oid, 'TEMP') THEN 'CONNECT'
+                                ELSE NULL
+                            END
+                        ) AS privileges,
+                        'DATABASE' AS level,
+                        r.rolcanlogin
+                    FROM
+                        pg_database c
+                    JOIN
+                        pg_roles r ON has_database_privilege(r.rolname, c.oid, 'CONNECT,CREATE,TEMPORARY,TEMP')
+                    WHERE
+                        datname = current_database()
+                    GROUP BY
+                        r.rolname, datname, r.rolcanlogin;
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    database_permissions_list = get_database_permissions_list(scan_id, acct_id, database_permissions_list, result)
+                    if result:
+                        print("result_type10: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                        
+                    
+                    # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname,
+                        current_database() AS catalog_name,
+                        n.nspname AS schema_name,
+                        'SCHEMA' AS level,
+                        'DATABASE' AS database_name,
+                        (
+                            SELECT ARRAY_AGG(priv)
+                            FROM (
+                                SELECT
+                                    CASE WHEN has_schema_privilege(r.rolname, n.nspname, 'CREATE') THEN 'CREATE' END AS priv
+                                UNION
+                                SELECT
+                                    CASE WHEN has_schema_privilege(r.rolname, n.nspname, 'USAGE') THEN 'USAGE' END AS priv
+                            ) AS privs
+                            WHERE priv IS NOT NULL
+                        ) AS privs,
+                        r.rolcanlogin
+                    FROM
+                        pg_namespace n
+                    JOIN
+                        pg_roles r ON true
+                    WHERE
+                        has_schema_privilege(r.rolname, n.nspname, 'CREATE,USAGE')
+                        AND n.nspname NOT LIKE 'pg_temp%'
+                        AND n.nspowner <> r.oid;
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    schema_privs_role_list = get_schema_privs_role_list(scan_id, acct_id, schema_privs_role_list, result)
+                    if result:
+                        print("result_type11: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                    
+                    
+                    
+                    # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname,
+                        current_database() AS catalog_name,
+                        c.schema_name,
+                        'SCHEMA' AS level,
+                        'DATABASE' AS database_name,
+                        'SCHEMA OWNER' AS privilege,
+                        r.rolcanlogin
+                    FROM
+                        information_schema.schemata c
+                    JOIN
+                        pg_roles r ON c.schema_owner = r.rolname
+                    WHERE
+                        has_schema_privilege(r.rolname, c.schema_name, 'CREATE,USAGE')
+                        AND c.schema_name NOT LIKE 'pg_temp%';
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    role_specific_privs_list = get_role_specific_privs_list(scan_id, acct_id, role_specific_privs_list, result)
+                    if result:
+                        print("result_type12: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                    
+                    
+                    # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname,
+                        current_database() AS catalog_name,
+                        'DATABASE' AS database_name,
+                        c.oid::regclass AS table_name,
+                        'TABLE' AS level,
+                        'TABLE OWNER' AS privilege,
+                        r.rolcanlogin
+                    FROM
+                        pg_class c
+                    JOIN
+                        pg_roles r ON c.relowner = r.oid
+                    JOIN
+                        pg_namespace n ON c.relnamespace = n.oid
+                    WHERE
+                        n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
+                        AND c.relkind = 'r'
+                        AND has_schema_privilege(r.rolname, n.oid, 'USAGE');
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("role_priv_tables_list 2", result)
+                    get_role_priv_tables_list(scan_id, acct_id, role_priv_tables_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type13: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                        
+                        
+                    # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname,
+                        current_database() AS catalog_name,
+                        'DATABASE' AS database_name,
+                        c.oid::regclass AS table_name,
+                        'TABLE' AS level,
+                        ARRAY(
+                            SELECT privs
+                            FROM unnest(ARRAY[
+                                (CASE WHEN has_table_privilege(r.rolname, c.oid, 'SELECT') THEN 'SELECT' ELSE NULL END),
+                                (CASE WHEN has_table_privilege(r.rolname, c.oid, 'INSERT') THEN 'INSERT' ELSE NULL END),
+                                (CASE WHEN has_table_privilege(r.rolname, c.oid, 'UPDATE') THEN 'UPDATE' ELSE NULL END),
+                                (CASE WHEN has_table_privilege(r.rolname, c.oid, 'DELETE') THEN 'DELETE' ELSE NULL END),
+                                (CASE WHEN has_table_privilege(r.rolname, c.oid, 'TRUNCATE') THEN 'TRUNCATE' ELSE NULL END),
+                                (CASE WHEN has_table_privilege(r.rolname, c.oid, 'REFERENCES') THEN 'REFERENCES' ELSE NULL END),
+                                (CASE WHEN has_table_privilege(r.rolname, c.oid, 'TRIGGER') THEN 'TRIGGER' ELSE NULL END)
+                            ]) AS privs
+                            WHERE privs IS NOT NULL
+                        ) AS privileges,
+                        r.rolcanlogin
+                    FROM
+                        pg_class c
+                    JOIN
+                        pg_roles r ON c.relowner = r.oid
+                    JOIN
+                        pg_namespace n ON c.relnamespace = n.oid
+                    WHERE
+                        n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
+                        AND c.relkind = 'r'
+                        AND has_table_privilege(r.rolname, c.oid, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
+                        AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
+                        AND c.relowner <> r.oid;
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("role_specific_priv_tables_list 2", result)
+                    get_role_specific_priv_tables_list(scan_id, acct_id, role_specific_priv_tables_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type14: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                    
+                    # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                      r.rolname,
+                      current_database() AS current_db,
+                      'DATABASE' AS object_type,
+                      c.oid::regclass AS object_name,
+                      'VIEW' AS object_kind,
+                      'VIEW OWNER' AS object_owner,
+                      r.rolcanlogin
+                    FROM
+                      pg_class c
+                    JOIN
+                      pg_namespace n ON c.relnamespace = n.oid
+                    JOIN
+                      pg_roles r ON c.relowner = r.oid
+                    WHERE
+                      n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
+                      AND c.relkind = 'v'
+                      AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE');
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("views_ownership_usage_privs_list 2", result)
+                    get_views_ownership_usage_privs_list(scan_id, acct_id, views_ownership_usage_privs_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type15: ", type(result[0]))
+                        print("result: ", result[0]._asdict()) 
+                    
+                    
+                    # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                      r.rolname,
+                      current_database() AS current_db,
+                      'DATABASE' AS object_type,
+                      c.oid::regclass AS object_name,
+                      'VIEW' AS object_kind,
+                      'VIEW OWNER' AS object_owner,
+                      ARRAY(
+                        SELECT privs
+                        FROM unnest(ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']) AS privs
+                        WHERE
+                          (privs = 'SELECT' AND has_table_privilege(r.rolname, c.oid, 'SELECT')) OR
+                          (privs = 'INSERT' AND has_table_privilege(r.rolname, c.oid, 'INSERT')) OR
+                          (privs = 'UPDATE' AND has_table_privilege(r.rolname, c.oid, 'UPDATE')) OR
+                          (privs = 'DELETE' AND has_table_privilege(r.rolname, c.oid, 'DELETE')) OR
+                          (privs = 'TRUNCATE' AND has_table_privilege(r.rolname, c.oid, 'TRUNCATE')) OR
+                          (privs = 'REFERENCES' AND has_table_privilege(r.rolname, c.oid, 'REFERENCES')) OR
+                          (privs = 'TRIGGER' AND has_table_privilege(r.rolname, c.oid, 'TRIGGER'))
+                      ) AS object_privileges,
+                      r.rolcanlogin
+                    FROM
+                      pg_class c
+                      JOIN pg_namespace n ON c.relnamespace = n.oid
+                      JOIN pg_roles r ON c.relowner = r.oid
+                    WHERE
+                      n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
+                      AND c.relkind = 'v'
+                      AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
+                      AND c.relowner <> r.oid;
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("view_privs_role_list 2", result)
+                    get_view_privs_role_list(scan_id, acct_id, view_privs_role_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type16: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                    
+                    
+                                        # Added by Prashant
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                      r.rolname,
+                      current_database() AS current_db,
+                      'DATABASE' AS object_type,
+                      c.oid::regclass AS object_name,
+                      'SEQUENCE' AS object_kind,
+                      'SEQUENCE OWNER' AS object_owner,
+                      r.rolcanlogin
+                    FROM
+                      pg_class c
+                      JOIN pg_namespace n ON c.relnamespace = n.oid
+                      JOIN pg_roles r ON c.relowner = r.oid
+                    WHERE
+                      n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
+                      AND c.relkind = 'S'
+                      AND has_table_privilege(r.rolname, c.oid, 'SELECT, UPDATE')
+                      AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
+                      AND c.relowner = r.oid;
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("sequence_ownership_usage_privs_list 2", result)
+                    get_sequence_ownership_usage_privs_list(scan_id, acct_id, sequence_ownership_usage_privs_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type17: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                    
+                    
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    WITH Privileges AS (
+                        SELECT
+                            r.rolname AS role_name,
+                            current_database() AS database_name,
+                            'DATABASE' AS object_type,
+                            c.oid::regclass AS object_name,
+                            'SEQUENCE' AS privilege_type,
+                            CASE WHEN has_table_privilege(r.rolname, c.oid, 'SELECT') THEN 'SELECT' ELSE NULL END AS select_priv,
+                            CASE WHEN has_table_privilege(r.rolname, c.oid, 'UPDATE') THEN 'UPDATE' ELSE NULL END AS update_priv,
+                            r.rolcanlogin AS can_login
+                        FROM
+                            pg_class c
+                        JOIN
+                            pg_namespace n ON c.relnamespace = n.oid
+                        JOIN
+                            pg_roles r ON r.oid = c.relowner
+                        WHERE
+                            n.nspname NOT IN ('information_schema', 'pg_catalog', 'sys')
+                            AND c.relkind = 'S'
+                            AND has_table_privilege(r.rolname, c.oid, 'SELECT,UPDATE')
+                            AND has_schema_privilege(r.rolname, c.relnamespace, 'USAGE')
+                    )
+                    SELECT
+                        role_name,
+                        database_name,
+                        object_type,
+                        object_name,
+                        privilege_type,
+                        ARRAY_REMOVE(ARRAY[select_priv, update_priv], NULL) AS privileges,
+                        can_login
+                    FROM
+                        Privileges
+                    WHERE
+                        ARRAY[select_priv, update_priv] IS NOT NULL;
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("roles_specific_privileges_sequences_list 2", result)
+                    get_roles_specific_privileges_sequences_list(scan_id, acct_id, roles_specific_privileges_sequences_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type18: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                        
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname AS role_name,
+                        current_database() AS database_name,
+                        'DATABASE' AS object_type,
+                        fdwname AS object_name,
+                        'FDW' AS privilege_type,
+                        'FDW OWNER' AS privilege_name,
+                        r.rolcanlogin AS can_login
+                    FROM
+                        pg_catalog.pg_foreign_data_wrapper fdw
+                    JOIN
+                        pg_catalog.pg_roles r ON fdw.fdwowner = r.oid
+                    WHERE
+                        has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE');
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("roles_privs_fdw_list 2", result)
+                    get_roles_privs_fdw_list(scan_id, acct_id, roles_privs_fdw_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type19: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                    
+                    
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname AS role_name,
+                        current_database() AS database_name,
+                        'DATABASE' AS object_type,
+                        fdwname AS object_name,
+                        'FDW' AS privilege_type,
+                        ARRAY[CASE WHEN has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE') THEN 'USAGE' ELSE NULL END] AS privileges,
+                        r.rolcanlogin AS can_login
+                    FROM
+                        pg_catalog.pg_foreign_data_wrapper
+                    JOIN
+                        pg_catalog.pg_roles r ON fdwowner = r.oid
+                    WHERE
+                        has_foreign_data_wrapper_privilege(r.rolname, fdwname, 'USAGE')
+                        AND fdwowner <> r.oid;
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("roles_login_fdw_list 2", result)
+                    get_roles_login_fdw_list(scan_id, acct_id, roles_login_fdw_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type20: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                        
+                    
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname AS role_name,
+                        current_database() AS database_name,
+                        'DATABASE' AS object_type,
+                        l.lanname AS object_name,
+                        'LANGUAGE' AS privilege_type,
+                        ARRAY[CASE WHEN has_language_privilege(r.rolname, l.lanname, 'USAGE') THEN 'USAGE' ELSE NULL END] AS privileges,
+                        r.rolcanlogin AS can_login
+                    FROM
+                        pg_catalog.pg_language l
+                    JOIN
+                        pg_catalog.pg_roles r ON has_language_privilege(r.rolname, l.lanname, 'USAGE');
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("roles_privs_language_list 2", result)
+                    get_roles_privs_language_list(scan_id, acct_id, roles_privs_language_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type21: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                        
                     ## Main SQL to get schema privs role list report 
                     #sql = f"""
                     #WITH elevated_perm_procs AS (
@@ -1756,33 +1756,33 @@ def lambda_handler(event, context):
                     #    print("result: ", result[0]._asdict())
 
 
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname AS role_name,
-                    #    current_database() AS database_name,
-                    #    'DATABASE' AS object_type,
-                    #    n.nspname || '.' || p.proname AS object_name,
-                    #    'FUNCTION' AS privilege_type,
-                    #    'FUNCTION OWNER' AS privilege_name,\
-                    #    r.rolcanlogin AS can_login
-                    #FROM
-                    #    pg_proc p
-                    #JOIN
-                    #    pg_namespace n ON p.pronamespace = n.oid
-                    #JOIN
-                    #    pg_roles r ON r.oid = p.proowner
-                    #WHERE 
-                    #    n.nspname <> 'pg_catalog';
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("functions_ownership_roles_list 2", result)
-                    #get_functions_ownership_roles_list(scan_id, acct_id, functions_ownership_roles_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type22: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
-                        
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname AS role_name,
+                        current_database() AS database_name,
+                        'DATABASE' AS object_type,
+                        n.nspname || '.' || p.proname AS object_name,
+                        'FUNCTION' AS privilege_type,
+                        'FUNCTION OWNER' AS privilege_name,\
+                        r.rolcanlogin AS can_login
+                    FROM
+                        pg_proc p
+                    JOIN
+                        pg_namespace n ON p.pronamespace = n.oid
+                    JOIN
+                        pg_roles r ON r.oid = p.proowner
+                    WHERE 
+                        n.nspname <> 'pg_catalog';
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("functions_ownership_roles_list 2", result)
+                    get_functions_ownership_roles_list(scan_id, acct_id, functions_ownership_roles_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type22: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
+                         
 
             else:
                 logger.info("DBAdminSecretName is not present in secret manager for the DB: %s" %(rds_secrets_list[index]["DBInstanceID"]))
