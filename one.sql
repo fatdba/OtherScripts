@@ -1013,21 +1013,28 @@ def lambda_handler(event, context):
         # Approch is to use the environment variable to customize the secret pattern.
         # Get the secret pattern from environment variable
         rds_secrets_list = []
-        db_secret_pattern = os.getenv("db_secret_pattern")
-        secret_pattern1 = "/secret/{}/rds-password"
-        secret_pattern2 = "/secret/{}/rds-password-v2"
- 
+        #db_secret_pattern = os.getenv("db_secret_pattern")
+        #secret_pattern1 = "/secret/{}/rds-password"
+        #secret_pattern2 = "/secret/{}/rds-password-v2"
+        
         for each in rds_list:
             # secret for db_admin we need to look for
             secrets_environments = os.getenv("secrets_environments").split(",")
             db_admin_secret_name_list = []
-            db_admin_secret_name=[secret_pattern1.format(each["DBInstanceID"]),secret_pattern2.format(each["DBInstanceID"])]
+            #db_admin_secret_name=[secret_pattern1.format(each["DBInstanceID"]),secret_pattern2.format(each["DBInstanceID"])]
+            db_admin_secret_name = []
             db_admin_secret_name_list.extend(db_admin_secret_name)
-            db_admin_secret_name_suffix='/rds/'+each["DBInstanceID"]
+            #db_admin_secret_name_suffix='/rds/'+each["DBInstanceID"]
             
+            secret_pattern3 = "{}/rds/{}/rw"
+            secret_pattern4 = "{}/rds/{}/ro"
+            #secret_pattern5 = "{}/rds/{}/bigid"
+            #secret_pattern6 = "{}/rds/{}/owner"
             #commented by Prashant
             for i in secrets_environments:
-                db_admin_secret_name_list.append(i+db_admin_secret_name_suffix)
+                #db_admin_secret_name_list.append(i+db_admin_secret_name_suffix)
+                db_admin_secret_name=[secret_pattern3.format(i,each["DBInstanceID"]),secret_pattern4.format(i,each["DBInstanceID"])]
+                db_admin_secret_name_list.extend(db_admin_secret_name)
             
             rds_secrets_list.append({
                 "ScanID": scan_id,
@@ -1756,32 +1763,32 @@ def lambda_handler(event, context):
                     #    print("result: ", result[0]._asdict())
 
 
-                    ## Main SQL to get schema privs role list report 
-                    #sql = f"""
-                    #SELECT
-                    #    r.rolname AS role_name,
-                    #    current_database() AS database_name,
-                    #    'DATABASE' AS object_type,
-                    #    n.nspname || '.' || p.proname AS object_name,
-                    #    'FUNCTION' AS privilege_type,
-                    #    'FUNCTION OWNER' AS privilege_name,\
-                    #    r.rolcanlogin AS can_login
-                    #FROM
-                    #    pg_proc p
-                    #JOIN
-                    #    pg_namespace n ON p.pronamespace = n.oid
-                    #JOIN
-                    #    pg_roles r ON r.oid = p.proowner
-                    #WHERE 
-                    #    n.nspname <> 'pg_catalog';
-                    #"""
-                    #result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
-                    #print("functions_ownership_roles_list 2", result)
-                    #get_functions_ownership_roles_list(scan_id, acct_id, functions_ownership_roles_list, result)
-                    ##print("role_priv_table",role_priv_tables)
-                    #if result:
-                    #    print("result_type22: ", type(result[0]))
-                    #    print("result: ", result[0]._asdict())
+                    # Main SQL to get schema privs role list report 
+                    sql = f"""
+                    SELECT
+                        r.rolname AS role_name,
+                        current_database() AS database_name,
+                        'DATABASE' AS object_type,
+                        n.nspname || '.' || p.proname AS object_name,
+                        'FUNCTION' AS privilege_type,
+                        'FUNCTION OWNER' AS privilege_name,\
+                        r.rolcanlogin AS can_login
+                    FROM
+                        pg_proc p
+                    JOIN
+                        pg_namespace n ON p.pronamespace = n.oid
+                    JOIN
+                        pg_roles r ON r.oid = p.proowner
+                    WHERE 
+                        n.nspname <> 'pg_catalog';
+                    """
+                    result = pgs.run_query_using_secrets(secrets_client, rds_secrets_list[index]['DBAdminSecretARN'], sql)
+                    print("functions_ownership_roles_list 2", result)
+                    get_functions_ownership_roles_list(scan_id, acct_id, functions_ownership_roles_list, result)
+                    #print("role_priv_table",role_priv_tables)
+                    if result:
+                        print("result_type22: ", type(result[0]))
+                        print("result: ", result[0]._asdict())
                          
 
             else:
