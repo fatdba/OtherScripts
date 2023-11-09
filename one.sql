@@ -1,7 +1,18 @@
-data "external" "import_role" {
-  program = ["sh", "-c", "echo '{\"arn\":\"arn:aws:iam::YOUR_ACCOUNT_ID:role/ROLE_NAME\"}'"]  # Replace YOUR_ACCOUNT_ID and ROLE_NAME
-}
+rror: Argument or block definition required
+│ 
+│ On .terraform/modules/edm_lambda/main.tf line 35: An argument or block
+│ definition is required here.
+╵
 
-output "imported_role_arn" {
-  value = jsondecode(data.external.import_role.result).arn
-}
+╷
+│ Error: Argument or block definition required
+│ 
+│ On .terraform/modules/edm_lambda/main.tf line 35: An argument or block
+│ definition is required here.
+╵
+
+╷
+│ Error: Argument or block definition required
+│ 
+│ On .terraform/modules/edm_lambda/main.tf line 35: An argument or block
+│ definition is required here.
