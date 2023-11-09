@@ -1,1 +1,12 @@
-Error: creating IAM Role (drift_detection): EntityAlreadyExists: Role with name drift_detection already exists. status code: 409, request id: 7344eae7-1845-436d-a5d8-84a0b946be4d
+resource "aws_iam_role" "lambda_role" {
+  # ... other role configuration ...
+}
+
+data "external" "import_role" {
+  program = ["echo", "import_role_id_here"]  # Replace "import_role_id_here" with the actual IAM role's ARN to import
+}
+
+# Output the ARN of the imported role
+output "imported_role_arn" {
+  value = data.external.import_role.result
+}
