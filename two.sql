@@ -1,31 +1,3 @@
-Skip to content
- Enterprise
-Search or jump to…
-Pull requests
-Issues
-Explore
- 
-@prashant-dixit 
-fitb-edm-udb
-/
-aws-sc-tf2cf
-Public
-Code
-Issues
-Pull requests
-Projects
-1
-Wiki
-Security
-Insights
-aws-sc-tf2cf/prod2/drift_detection_new_test_pattern1/modules/drift_detection/driftdetection.py
-
-Prashant Dixit prod2newdir
-Latest commit 6a66253 10 days ago
- History
- 0 contributors
-1885 lines (1723 sloc)  101 KB
-
 #Boto3 Modules
 import boto3
 import botocore
@@ -1911,16 +1883,3 @@ def lambda_handler(event, context):
     print("flag:", flag)
     print(table_names_list)
     generate_csv_and_pdf_reports_for_the_drift_tables(reporting_db_secrets_client, reporting_db_secret_arn, table_names_list, scan_id)
-Footer5/3 Bank
-5/3 Bank
-5/3 Bank
-© 2023 GitHub, Inc.
-Footer navigation
-Help
-Support
-API
-Training
-Blog
-About
-GitHub Enterprise Server 3.8.9
-aws-sc-tf2cf/prod2 at feature/prashant · fitb-edm-udb/aws-sc-tf2cfaws-sc-tf2cf/driftdetection.py at feature/prashant · fitb-edm-udb/aws-sc-tf2cf
