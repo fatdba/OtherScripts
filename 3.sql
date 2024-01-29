@@ -1,4 +1,5 @@
+Hello Mike,
 
-Hello Michael,
+I reached out to AWS Support to inquire about the feasibility of physical streaming replication between an on-premises source and an RDS or Aurora PostgreSQL target. According to their response, this type of replication is not supported due to the necessity of access to the underlying host and various other limitations. Regrettably, there is no formal document available, but all the relevant information is recorded in the ticket history. They suggested presenting this information to anyone seeking details about the limitation.
 
-I've returned from India and resumed office today. I'm still dealing with significant jet lag, and as we discussed, I plan to commence the Bank's tasks and activities starting tomorrow. I've confirmed my access and can connect to the Bank's network without any issues. All applications, including my AWS access, IDEs, Appgate SDP clients, TF Cloud, and GitHub, are functioning well for me.
+The support case, including the entire conversation and the final decision from the RDS & Aurora support team regarding replication, is outlined below. Kindly review it, and if there are any lingering uncertainties, feel free to let me know. I've instructed the engineer to keep the ticket open for a few more days to address any additional questions.
