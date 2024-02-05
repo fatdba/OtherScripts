@@ -1,23 +1,17 @@
-resource "aws_lambda_layer_version" "postgres_utils_layer" {
-  filename            = "${path.module}/postgres_utils/postgres_utils.zip"
-  layer_name          = "postgres_utils"
-  source_code_hash    = filebase64sha256("${path.module}/postgres_utils/postgres_utils.zip")
-  compatible_runtimes = ["python3.9"]
-  tags                = local.common-tags
+PetValu Access : Dennis and David, Michelle 
 
-  lifecycle {
-    prevent_destroy = true
-  }
-}
 
-resource "aws_lambda_layer_version" "csv2pdf_layer" {
-  filename            = "${path.module}/csv2pdf/csv2pdf.zip"
-  layer_name          = "csv2pdf"
-  source_code_hash    = filebase64sha256("${path.module}/csv2pdf/csv2pdf.zip")
-  compatible_runtimes = ["python3.9"]
-  tags                = local.common-tags
+ATSG New Servers (( Share the new password file)
+Few of the newly added servers which were created when I was struggling with Fifth Third Bank. 
+Last time faced huge issues to get password for the new server when I was investigating that slowness issues in MXSandbox database.
+Any consilidated list which contaisn all userids, accounts and password for all database that we support for ATSG. 
 
-  lifecycle {
-    prevent_destroy = true
-  }
-}
+DBVisit Access and status checks
+
+Massachusetts Teachers' Retirement System - Standby issues
+
+Anything new with Jasper
+
+Anything with any other customer.
+
+
