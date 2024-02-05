@@ -1,2 +1,23 @@
-{"@level":"info","@message":"module.lambda_layers.aws_lambda_layer_version.postgres_utils_layer: Plan to replace","@module":"terraform.ui","@timestamp":"2024-01-31T14:15:42.597465Z","change":{"resource":{"addr":"module.lambda_layers.aws_lambda_layer_version.postgres_utils_layer","module":"module.lambda_layers","resource":"aws_lambda_layer_version.postgres_utils_layer","implied_provider":"aws","resource_type":"aws_lambda_layer_version","resource_name":"postgres_utils_layer","resource_key":null},"action":"replace","reason":"cannot_update"},"type":"planned_change"}
-{"@level":"info","@message":"module.lambda_layers.aws_lambda_layer_version.csv2pdf_layer: Plan to replace","@module":"terraform.ui","@timestamp":"2024-01-31T14:15:42.597484Z","change":{"resource":{"addr":"module.lambda_layers.aws_lambda_layer_version.csv2pdf_layer","module":"module.lambda_layers","resource":"aws_lambda_layer_version.csv2pdf_layer","implied_provider":"aws","resource_type":"aws_lambda_layer_version","resource_name":"csv2pdf_layer","resource_key":null},"action":"replace","reason":"cannot_update"},"type":"planned_change"}
+resource "aws_lambda_layer_version" "postgres_utils_layer" {
+  filename            = "${path.module}/postgres_utils/postgres_utils.zip"
+  layer_name          = "postgres_utils"
+  source_code_hash    = filebase64sha256("${path.module}/postgres_utils/postgres_utils.zip")
+  compatible_runtimes = ["python3.9"]
+  tags                = local.common-tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_lambda_layer_version" "csv2pdf_layer" {
+  filename            = "${path.module}/csv2pdf/csv2pdf.zip"
+  layer_name          = "csv2pdf"
+  source_code_hash    = filebase64sha256("${path.module}/csv2pdf/csv2pdf.zip")
+  compatible_runtimes = ["python3.9"]
+  tags                = local.common-tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
