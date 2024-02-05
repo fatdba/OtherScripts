@@ -1,13 +1,92 @@
-I have completed my analysis to obtain costing information for the logical replication approach, and the following highlights encompass each of the involved components:
+##################################################################################
+# DATA INPUTS
+##################################################################################
+data "aws_region" "current" {}
+#data "aws_caller_identity" "current" {}
+data "aws_vpc" "default" {}
 
-In the scenario where the primary instance resides in the customer's on-premises data center, the costs will be associated with running RDS, including storage cost, licensing cost, instance size, instance type, IO types, etc.
+##################################################################################
+# RESOURCES
+##################################################################################
 
-No data replication costs will be incurred.
+locals {
+  common-tags = {}
 
-If we opt for the "db.m4.4xlarge" type for the RDS instance (16 vCPUs) with 64 GB memory, a single AZ, no RDS Proxy, and an on-demand instance, the monthly cost for Amazon RDS PostgreSQL instances will be $1,066.53. This is calculated as follows: 1 instance(s) x $1.461 hourly x (100% utilization/month) x 730 hours in a month = $1,066.53.
+  # Execution role name of the lambda
+  lambda_role_name = "drift_detection"
 
-Assuming 100 GB storage with the general-purpose gp2 type, the monthly storage cost will be $11.50: 100 GB per month x $0.115 x 1 instance = $11.50 (Storage Cost).
+ # SG associated with the lambda - Default SG in the account
+  sg_ids = var.base_environment == "nonprod" ? ["sg-0739ce20d0c077285"] : ["sg-0739ce20d0c077285"]
 
-It is assumed that the network configuration between on-premises and AWS infrastructure already exists, and no new networking components such as Transit Gateways, networking rules, or objects need to be created.
+  # subnets associated with the lambda - sn-mgmt-0,sn-mgmt-1,sn-mgmt-2
+  subnet_ids = var.base_environment == "nonprod" ? [
+          "subnet-00180dd9263dcd6cd",
+          "subnet-01c9042d2383a1025",
+          "subnet-0e85ff762873c39ef"] : [
+          "subnet-00180dd9263dcd6cd",
+          "subnet-01c9042d2383a1025",
+          "subnet-0e85ff762873c39ef"]
 
-DMS-based logical replication setup is not considered, and native PostgreSQL replication methods will be used to avoid additional costs for replication instances, storage, and computation.
+ 
+  # lambda function to create bigid user in a different account
+  lambda_function_map = [
+    {
+      function_name = "rds-drift-detection"
+      file_name     = "drift_detection_sql_query_no_error/modules/drift_detection/driftdetection.zip"
+      policy        = "rds_drift_detection_access"
+      timeout       = 900
+      reserved_concurrent_executions = 5
+    }
+  ]
+
+  # Seems like the layer and version has to be hardcoded for now -https://stackoverflow.com/questions/65735878/how-to-configure-cloudwatch-lambda-insights-in-terraform
+  # Tried to make it dynamic by using the aws_lambda_layer_version module but could not make it work
+  # This is the latest version for us-east-1,2 regions
+  lambda_insights_layer_name = "arn:aws:lambda:${data.aws_region.current.name}:580247275435:layer:LambdaInsightsExtension:38"
+}
+
+# Layers will create the postgres_utils layer and athena layer
+module "lambda_layers" {
+  source = "./modules/lambda_layer"
+}
+
+
+# Loop through the lambda function map and call module to create them
+module "edm_lambda" {
+  for_each = { for lambdas in local.lambda_function_map : lambdas.function_name => lambdas }
+  source             = "git@github.info53.com:fitb-edm-dba/sanjeeba_lambda.git?ref=feature/create_lambda"
+  function_name      = "edm-${each.value["function_name"]}"
+  #handler            = "drift_detection.lambda_function.lambda_handler"
+  handler            = "driftdetection.lambda_handler"
+  python_runtime     = "python3.9"
+  security_group_ids = local.sg_ids
+  subnet_ids         = local.subnet_ids
+  layer_arns = [module.lambda_layers.postgres_utils_layer_arn,module.lambda_layers.csv2pdf_layer_arn,
+    local.lambda_insights_layer_name
+  ]
+  file_name                 = "${path.module}/${each.value["file_name"]}"
+  iam_policy_arn_to_attach  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${each.value["policy"]}"
+  invoke_function_principal = ["secretsmanager.amazonaws.com"]
+  timeout                   = each.value["timeout"]
+  environment_variables     = { 
+    SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${data.aws_region.current.name}.amazonaws.com"
+    environment = "nonprod"
+    db_secret_arn = "arn:aws:secretsmanager:us-east-2:219586591115:secret:/secret/edm-pg/rds-password-dPyQM8"
+    secrets_environments = "prod,nonprod,sandbox,dev,uat,branch,development,dr,production,staging,test,stage"
+    account_ids = "219586591115,728226656595,876106364951,929661497517,558466186906"
+    db_secret_pattern = ""  
+  }
+  reserved_concurrent_executions = each.value["reserved_concurrent_executions"]
+  lambda_role_name = local.lambda_role_name
+}
+
+## Following import block works for v 1.5.0 or later versions
+import {
+  to = module.edm_lambda["rds-drift-detection"].aws_iam_role.lambda_role[0]
+  id = "drift_detection"
+}
+  
+import {
+  to = module.lambda_layers["drift_detection_sql_query_no_error/modules/lambda_layer/postgres_utils/postgres_utils.zip"].aws_lambda_layer_version.postgres_utils_layer
+  id = "modules/lambda_layer/postgres_utils/postgres_utils.zip"
+}  
