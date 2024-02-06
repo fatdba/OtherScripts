@@ -1,17 +1,5 @@
-PetValu Access : Dennis and David, Michelle 
+Many of the errors we've encountered can be attributed to modifications made within the existing directory. The GitHub repository and Terraform configuration were designed in such a way that necessitates the creation of a new folder for each new object or Lambda. By establishing a new folder and directing the parent main.tf to it, we can avoid errors and conflicts. Notably, this approach eliminates the need for modifications in Terraform concerning workspaces.
 
+The recent success can be attributed to the creation of a fresh folder named "prod3." The absence of "prod3" information in the state file resulted in the resolution of errors without extensive efforts.
 
-ATSG New Servers (( Share the new password file)
-Few of the newly added servers which were created when I was struggling with Fifth Third Bank. 
-Last time faced huge issues to get password for the new server when I was investigating that slowness issues in MXSandbox database.
-Any consilidated list which contaisn all userids, accounts and password for all database that we support for ATSG. 
-
-DBVisit Access and status checks
-
-Massachusetts Teachers' Retirement System - Standby issues
-
-Anything new with Jasper
-
-Anything with any other customer.
-
-
+Regarding the deployment of the prod lambda, attempts were made yesterday using lifecycle clauses to prevent destruction. However, the plan indicated its need for destruction, deeming it critical for dropping and recreating. Efforts were also made to use the import block to reimport the two existing layers, but syntax issues were encountered. Testing these import procedures is scheduled for today. Alternatively, allowing the initial drop and recreate may be necessary, but subsequent occurrences should not replicate this behavior, mirroring the experience in the development environment.
