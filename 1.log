@@ -1,3 +1,5 @@
+https://mtrs.sharefile.com/public/share/web-sfafcea7aa4db4dd796bd38f255131176
+
 vi /etc/init.d/oraclestartnew
 
   904  systemctl daemon-reload
