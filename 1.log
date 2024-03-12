@@ -1,5 +1,27 @@
+set_environment_variables.sh
+
+#!/bin/bash
+
+# Set AWS_DEFAULT_REGION
 export AWS_DEFAULT_REGION=us-east-2
+
+# Set account_ids
 export account_ids=589839611729
+
+# Set SECRETS_MANAGER_ENDPOINT
 export SECRETS_MANAGER_ENDPOINT=https://secretsmanager.us-east-2.amazonaws.com
+
+# Set db_secret_arn
 export db_secret_arn=arn:aws:secretsmanager:us-east-2:589839611729:secret:secret/michaeltestc-db/rds-password-gok7XS
+
+# Set environment
 export environment=sandbox
+
+echo "Environment variables set:"
+echo "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
+echo "account_ids: $account_ids"
+echo "SECRETS_MANAGER_ENDPOINT: $SECRETS_MANAGER_ENDPOINT"
+echo "db_secret_arn: $db_secret_arn"
+echo "environment: $environment"
+
+
