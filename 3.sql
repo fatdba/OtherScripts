@@ -1,3 +1,7 @@
-The error message indicates an "AccessDeniedException" when attempting to perform the secretsmanager:GetSecretValue operation. The user (in this case, the assumed role arn:aws:sts::975050016786:assumed-role/ec2_ssm_edm-ops/i-0e45527e5a2a41beb) does not have the necessary permissions to execute this action on the specified resource (arn:aws:secretsmanager:us-east-2:589839611729:secret:secret/michaeltestc-db/rds-password-gok7XS).
-
-To resolve this issue, you need to ensure that the IAM role associated with the EC2 instance (arn:aws:sts::975050016786:assumed-role/ec2_ssm_edm-ops/i-0e45527e5a2a41beb) has the required permissions to access the Secrets Manager resource.
+-bash-4.2$ aws s3 ls s3://edm-saas-dev-arrxi
+Traceback (most recent call last):
+  File "/usr/bin/aws", line 19, in <module>
+    import awscli.clidriver
+  File "/usr/lib/python2.7/site-packages/awscli/clidriver.py", line 17, in <module>
+    import botocore.session
+ImportError: No module named botocore.session
