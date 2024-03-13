@@ -1,4 +1,18 @@
-Traceback (most recent call last):
-  File "/tmp/lambda_layer/new.py", line 8, in <module>
-    from csv2pdf import convert
-ImportError: cannot import name 'convert' from 'csv2pdf' (unknown location)
+[03-06 3:47 p.m.] Dixit, Prashant
+logger = logging.getLogger()
+
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+[03-06 3:50 p.m.] Dixit, Prashant
+file_handler = logging.FileHandler('lambdalogging.log')
+
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+[03-06 3:51 p.m.] Dixit, Prashant
+console_handler = logging.StreamHandler()
+
+console_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
