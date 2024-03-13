@@ -1,12 +1,59 @@
-Test Event Name
-test-run
+bash-4.2$
+-bash-4.2$ python3 new.py
+NOTICE:  table "instances_info" does not exist, skipping
+NOTICE:  table "snapshots_info" does not exist, skipping
+NOTICE:  table "audit_role_privileges" does not exist, skipping
+NOTICE:  table "connection_summary" does not exist, skipping
+NOTICE:  table "public_role_privileges" does not exist, skipping
+result:  nextval
+-------
+      1
+(1 row)
+REACHED HERE1
+CHECK1
+exception%% @@@@@@@
+CHECK3
+[Errno 1] Operation not permitted: '/tmp/results.json.FF05a9d0' -> '/tmp/results.json'
+CHECK4
+acct_ids [] 0
+REACHED HERE2
+REACHED HERE3
+REACHED HERE4
+db_cluster:  {'DBClusters': [{'AllocatedStorage': 1, 'AvailabilityZones': ['us-east-2b', 'us-east-2c', 'us-east-2a'], 'BackupRetentionPeriod': 7, 'DatabaseName': 'edm_db', 'DBClusterIdentifier': 'edm-v2', 'DBClusterParameterGroup': 'edm', 'DBSubnetGroup': 'terraform-20240228161505875100000001', 'Status': 'available', 'EarliestRestorableTime': datetime.datetime(2024, 3, 6, 0, 12, 23, 222000, tzinfo=tzlocal()), 'Endpoint': 'edm-v2.cluster-c9fzyhbqneoo.us-east-2.rds.amazonaws.com', 'ReaderEndpoint': 'edm-v2.cluster-ro-c9fzyhbqneoo.us-east-2.rds.amazonaws.com','MultiAZ': False, 'Engine': 'aurora-postgresql', 'EngineVersion': '14.6', 'LatestRestorableTime': datetime.datetime(2024, 3, 13, 18, 14, 44, 422000, tzinfo=tzlocal()), 'Port': 5400, 'MasterUsername': 'db_admin', 'PreferredBackupWindow': '00:00-04:00', 'PreferredMaintenanceWindow': 'mon:08:10-mon:08:50', 'ReadReplicaIdentifiers': [], 'DBClusterMembers': [{'DBInstanceIdentifier': 'edm-0', 'IsClusterWriter': True, 'DBClusterParameterGroupStatus': 'in-sync', 'PromotionTier': 0}], 'VpcSecurityGroups': [{'VpcSecurityGroupId': 'sg-0c591bfeb885aa11f', 'Status': 'active'}], 'HostedZoneId': 'Z2XHWR1WZ565X2', 'StorageEncrypted': True, 'KmsKeyId': 'arn:aws:kms:us-east-2:589839611729:key/1f6d6121-9ee7-4fbf-8f91-a3ffc0f855fb', 'DbClusterResourceId': 'cluster-LU6YKUTQOBPKZZJ3ZW7IE2KS2E', 'DBClusterArn': 'arn:aws:rds:us-east-2:589839611729:cluster:edm-v2', 'AssociatedRoles': [], 'IAMDatabaseAuthenticationEnabled': True, 'ClusterCreateTime': datetime.datetime(2024, 2, 28, 18, 46, 42, 167000, tzinfo=tzlocal()), 'EnabledCloudwatchLogsExports': ['postgresql'], 'EngineMode': 'provisioned', 'DeletionProtection': False, 'HttpEndpointEnabled': False, 'ActivityStreamStatus': 'stopped', 'CopyTagsToSnapshot': True, 'CrossAccountClone': False, 'DomainMemberships': [], 'TagList': [], 'AutoMinorVersionUpgrade': True, 'ServerlessV2ScalingConfiguration': {'MinCapacity': 2.0, 'MaxCapacity': 128.0}, 'NetworkType': 'IPV4'}], 'ResponseMetadata': {'RequestId': '5ccd99b0-b8ea-4cef-8c81-052ba3aaa07a', 'HTTPStatusCode': 200, 'HTTPHeaders': {'x-amzn-requestid': '5ccd99b0-b8ea-4cef-8c81-052ba3aaa07a', 'strict-transport-security': 'max-age=31536000', 'content-type': 'text/xml', 'content-length': '3013', 'date': 'Wed, 13 Mar 2024 18:18:24 GMT'}, 'RetryAttempts': 0}}
+db_cluster:  {'DBClusters': [{'AllocatedStorage': 1, 'AvailabilityZones': ['us-east-2b', 'us-east-2c', 'us-east-2a'], 'BackupRetentionPeriod': 7, 'DatabaseName': 'michaeltestcdb_db', 'DBClusterIdentifier': 'michaeltestc-db-v2', 'DBClusterParameterGroup': 'michaeltestc-db', 'DBSubnetGroup': 'terraform-20230425011345784500000001', 'Status': 'available', 'EarliestRestorableTime': datetime.datetime(2024, 3, 6, 0, 8, 11, 757000, tzinfo=tzlocal()), 'Endpoint': 'michaeltestc-db-v2.cluster-c9fzyhbqneoo.us-east-2.rds.amazonaws.com', 'ReaderEndpoint': 'michaeltestc-db-v2.cluster-ro-c9fzyhbqneoo.us-east-2.rds.amazonaws.com', 'MultiAZ': False, 'Engine': 'aurora-postgresql', 'EngineVersion': '14.5', 'LatestRestorableTime': datetime.datetime(2024, 3, 13, 18, 13, 7, 628000, tzinfo=tzlocal()), 'Port': 5432, 'MasterUsername': 'db_admin', 'PreferredBackupWindow': '00:00-04:00', 'PreferredMaintenanceWindow': 'thu:04:01-thu:06:00', 'ReadReplicaIdentifiers': [], 'DBClusterMembers': [{'DBInstanceIdentifier': 'michaeltestc-db-0', 'IsClusterWriter': True, 'DBClusterParameterGroupStatus': 'pending-reboot', 'PromotionTier': 0}], 'VpcSecurityGroups': [{'VpcSecurityGroupId': 'sg-054a968ac5d593967', 'Status': 'active'}], 'HostedZoneId': 'Z2XHWR1WZ565X2', 'StorageEncrypted': True, 'KmsKeyId': 'arn:aws:kms:us-east-2:589839611729:key/1f6d6121-9ee7-4fbf-8f91-a3ffc0f855fb', 'DbClusterResourceId': 'cluster-74AVUBA3P3UK4X7EQ6WAUA27GY', 'DBClusterArn': 'arn:aws:rds:us-east-2:589839611729:cluster:michaeltestc-db-v2', 'AssociatedRoles': [], 'IAMDatabaseAuthenticationEnabled': False, 'ClusterCreateTime': datetime.datetime(2023, 4, 25, 1, 13, 48, 491000, tzinfo=tzlocal()), 'EnabledCloudwatchLogsExports': ['postgresql'], 'EngineMode': 'provisioned', 'DeletionProtection': False, 'HttpEndpointEnabled': False, 'ActivityStreamStatus': 'stopped', 'CopyTagsToSnapshot': True, 'CrossAccountClone': False, 'DomainMemberships': [], 'TagList': [], 'AutoMinorVersionUpgrade': True, 'ServerlessV2ScalingConfiguration': {'MinCapacity': 0.5, 'MaxCapacity': 16.0}, 'NetworkType': 'IPV4'}], 'ResponseMetadata': {'RequestId': '69bad014-d2fe-47de-889e-9a31f8765989', 'HTTPStatusCode': 200, 'HTTPHeaders': {'x-amzn-requestid': '69bad014-d2fe-47de-889e-9a31f8765989', 'strict-transport-security': 'max-age=31536000', 'content-type': 'text/xml', 'content-length': '3103', 'date': 'Wed, 13 Mar 2024 18:18:24 GMT'}, 'RetryAttempts': 0}}
+REACHED HERE5
+rds_list [{'ScanId': '1', 'AccountID': '589839611729', 'DBInstanceID': 'alerttestingkey', 'SecretHost': 'alerttestingkey.c9fzyhbqneoo.us-east-2.rds.amazonaws.com', 'SecretPort': 5432, 'MultiAZ': True, 'Engine': 'postgres', 'EngineVersion': '14.10', 'ClusterEncrypted': 'NA', 'DatabaseName': 'alerttestingdb', 'BackupRetentionPeriod': 7, 'PubliclyAccessible': False, 'InstanceEncrypted': True, 'PerformanceInsightsEnabled': True, 'MinACU': 'NA', 'MaxACU': 'NA'}, {'ScanId': '1', 'AccountID': '589839611729', 'DBInstanceID': 'edm', 'SecretHost': 'edm-v2.cluster-c9fzyhbqneoo.us-east-2.rds.amazonaws.com', 'SecretPort': '5400', 'MultiAZ': 'False', 'Engine': 'aurora-postgresql', 'EngineVersion': '14.6', 'ClusterEncrypted': True, 'DatabaseName': 'edm_db', 'BackupRetentionPeriod': 7, 'PubliclyAccessible': False, 'InstanceEncrypted': True, 'PerformanceInsightsEnabled': 'NA', 'MinACU': 2.0, 'MaxACU': 128.0}, {'ScanId': '1', 'AccountID': '589839611729', 'DBInstanceID': 'michaeltestc-db', 'SecretHost': 'michaeltestc-db-v2.cluster-c9fzyhbqneoo.us-east-2.rds.amazonaws.com', 'SecretPort': '5432', 'MultiAZ': 'False', 'Engine': 'aurora-postgresql', 'EngineVersion': '14.5', 'ClusterEncrypted': True, 'DatabaseName': 'michaeltestcdb_db', 'BackupRetentionPeriod': 7, 'PubliclyAccessible': False, 'InstanceEncrypted': True,'PerformanceInsightsEnabled': 'NA', 'MinACU': 0.5, 'MaxACU': 16.0}]
+rds_summary_list []
+driftdetection123 [{'ScanID': '1', 'AccountID': '589839611729', 'DBInstanceID': 'alerttestingkey', 'DatabaseName': 'alerttestingdb', 'DBAdminSecretName': ['/secret/alerttestingkey/rds-password', '/secret/alerttestingkey/rds-password-v2', 'n/rds/alerttestingkey', 'o/rds/alerttestingkey', 'n/rds/alerttestingkey', 'p/rds/alerttestingkey', 'r/rds/alerttestingkey', 'o/rds/alerttestingkey', 'd/rds/alerttestingkey'], 'DBAdminSecretARN': '', 'DBAdminSecretPresent': ''}, {'ScanID': '1', 'AccountID': '589839611729', 'DBInstanceID': 'edm', 'DatabaseName': 'edm_db', 'DBAdminSecretName': ['/secret/edm/rds-password', '/secret/edm/rds-password-v2', 'n/rds/edm', 'o/rds/edm', 'n/rds/edm', 'p/rds/edm', 'r/rds/edm', 'o/rds/edm', 'd/rds/edm'], 'DBAdminSecretARN': '', 'DBAdminSecretPresent': ''}, {'ScanID': '1', 'AccountID': '589839611729', 'DBInstanceID': 'michaeltestc-db', 'DatabaseName': 'michaeltestcdb_db', 'DBAdminSecretName': ['/secret/michaeltestc-db/rds-password', '/secret/michaeltestc-db/rds-password-v2', 'n/rds/michaeltestc-db', 'o/rds/michaeltestc-db', 'n/rds/michaeltestc-db', 'p/rds/michaeltestc-db', 'r/rds/michaeltestc-db', 'o/rds/michaeltestc-db', 'd/rds/michaeltestc-db'], 'DBAdminSecretARN': '', 'DBAdminSecretPresent': ''}]
+REACHED HERE6
+arn:aws:secretsmanager:us-east-2:589839611729:secret:/secret/edm/rds-password-v2-7uDxF7
+-1 Unable to login to server with secret
+arn:aws:secretsmanager:us-east-2:589839611729:secret:/secret/michaeltestc-db/rds-password-gok7XS
+CHECK run_query_using_secrets
+0 Successfully executed query
+connection successful
+result_type3:  <class 'pgdb.Row'>
+result:  {'_0': 'public', 'catalog_name': 'michaeltestcdb_db', 'schema_name': 'pg_catalog', 'level': 'SCHEMA', '_4': 'DATABASE', 'array': ['USAGE'], '_6': 'f'}
+result_type8:  <class 'pgdb.Row'>
+result:  {'_0': 'public', 'current_database': 'michaeltestcdb_db', '_2': 'DATABASE', 'lanname': 'internal', '_4': 'LANGUAGE', 'array': ['USAGE'], '_6': 'f'}
+[Row(user_role_id=27097, user_role_name='hammer', role_can_login=True, other_role_id=16386, other_role_name='rds_superuser', has_replication_perm=False, has_createrole_perm=True, has_createdb_perm=True), Row(user_role_id=16399, user_role_name='db_admin', role_can_login=True, other_role_id=16386, other_role_name='rds_superuser', has_replication_perm=False, has_createrole_perm=True, has_createdb_perm=True), Row(user_role_id=27097, user_role_name='hammer', role_can_login=True, other_role_id=16399, other_role_name='db_admin', has_replication_perm=False, has_createrole_perm=True, has_createdb_perm=True), Row(user_role_id=27097, user_role_name='hammer', role_can_login=True, other_role_id=41132, other_role_name='tpcc', has_replication_perm=False, has_createrole_perm=True, has_createdb_perm=True)]
+[{'ScanId': '1', 'AccountID': '589839611729', 'user_role_id': 27097, 'user_role_name': 'hammer', 'role_can_login': True, 'other_role_id': 16386, 'other_role_name': 'rds_superuser', 'has_replication_perm': False, 'has_createrole_perm': True, 'has_createdb_perm': True}, {'ScanId': '1', 'AccountID': '589839611729', 'user_role_id': 16399, 'user_role_name': 'db_admin', 'role_can_login': True, 'other_role_id': 16386, 'other_role_name': 'rds_superuser', 'has_replication_perm': False, 'has_createrole_perm': True, 'has_createdb_perm': True}, {'ScanId': '1', 'AccountID': '589839611729', 'user_role_id': 27097, 'user_role_name': 'hammer', 'role_can_login': True, 'other_role_id': 16399, 'other_role_name': 'db_admin', 'has_replication_perm': False, 'has_createrole_perm': True, 'has_createdb_perm': True}, {'ScanId': '1', 'AccountID': '589839611729', 'user_role_id': 27097, 'user_role_name': 'hammer', 'role_can_login': True, 'other_role_id': 41132, 'other_role_name': 'tpcc', 'has_replication_perm': False, 'has_createrole_perm': True, 'has_createdb_perm': True}]
+result_type9:  <class 'pgdb.Row'>
+result:  {'user_role_id': 27097, 'user_role_name': 'hammer', 'role_can_login': True, 'other_role_id': 16386, 'other_role_name': 'rds_superuser', 'has_replication_perm': False, 'has_createrole_perm': True, 'has_createdb_perm': True}
+REACHED HERE7
+NOTICE:  column "scanid" of relation "user_roles" already exists, skipping
+REACHED HERE7.1
+NOTICE:  column "scanid" of relation "audit_role_privileges" already exists, skipping
+NOTICE:  column "scanid" of relation "public_role_privileges" already exists, skipping
+Traceback (most recent call last):
+  File "/tmp/lambda_layer/new.py", line 1066, in <module>
+    update_table(summary_list, summary_table_parameter_list, summary_table_name)
+  File "/tmp/lambda_layer/new.py", line 68, in update_table
+    status_code  = db.query(sql1)
+  File "/usr/local/lib/python3.9/site-packages/pg.py", line 2001, in query
+    return self.db.query(command)
+pg.ProgrammingError: ERROR:  relation "connection_summary" does not exist
+LINE 1: INSERT INTO connection_summary (ScanID, AccountID, AccountNa...
+                    ^
 
-Response
-{
-  "errorMessage": "Replacement index 1 out of range for positional args tuple",
-  "errorType": "IndexError",
-  "requestId": "b0892377-a65c-4eeb-827f-b29ef4d30a51",
-  "stackTrace": [
-    "  File \"/var/task/lambda_function.py\", line 1032, in lambda_handler\n    db_admin_secret_name=[secret_pattern3.format(each[\"DBInstanceID\"])]\n"
-  ]
-}
+-bash-4.2$
