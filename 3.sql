@@ -1,7 +1,4 @@
--bash-4.2$ aws s3 ls s3://edm-saas-dev-arrxi
-Traceback (most recent call last):
-  File "/usr/bin/aws", line 19, in <module>
-    import awscli.clidriver
-  File "/usr/lib/python2.7/site-packages/awscli/clidriver.py", line 17, in <module>
-    import botocore.session
-ImportError: No module named botocore.session
+ws s3 cp s3:edm-saas-dev-arrxi/2024-03-13/edm-drift_detection.py /tmp/edm-drift_detection.py
+
+usage: aws s3 cp <LocalPath> <S3Uri> or <S3Uri> <LocalPath> or <S3Uri> <S3Uri>
+Error: Invalid argument type
