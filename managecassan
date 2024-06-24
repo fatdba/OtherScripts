@@ -1,0 +1,4 @@
+SELECT id, keyspace_name, columnfamily_name, compacted_at, bytes_in, bytes_out, sstables_in, sstables_out
+FROM system.compaction_history
+ORDER BY compacted_at DESC
+LIMIT 1;
