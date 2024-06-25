@@ -1,0 +1,340 @@
+To set TTL levels for specific tables in Cassandra only during insert statements, you need to use the USING TTL clause for each INSERT statement. 
+
+
+
+Here are examples of how you might insert data into each table with the specified TTL:
+
+For ici_transaction_mtm_f table:
+
+
+INSERT INTO keyspace.ici_transaction_mtm_f (id, transaction_date, amount)
+VALUES (uuid(), '2024-06-18', 1000) USING TTL 1468800;
+For analytic_seq_attribution_f table:
+-- uuid(): This is a function that generates a unique identifier (UUID) for the id column.
+-- '2024-06-18': This is a literal string representing a date, which will be inserted into the trade_date column.
+-- 'value': This is a literal string that will be inserted into the trade_value column.
+USING TTL 2592000 clause ensures that this row will automatically expire and be deleted after 30 days (2592000 seconds).
+
+INSERT INTO keyspace.analytic_seq_attribution_f (id, attribution_date, attribution_value)
+VALUES (uuid(), '2024-06-18', 'value') USING TTL 1209600;
+For trade_mtm_src_f table:
+
+
+INSERT INTO keyspace.trade_mtm_src_f (id, trade_date, trade_value)
+VALUES (uuid(), '2024-06-18', 'value') USING TTL 2592000;
+
+
+----------
+Automating TTL for Inserts
+To ensure that every insert statement uses the appropriate TTL without manually specifying it each time, you can create a wrapper or use a client application to handle inserts.
+
+
+
+Example Using a Python Script with cassandra-driver:
+- Install the Cassandra Driver:
+pip install cassandra-driver
+
+
+- Python Script to Insert Data with TTL:
+
+from cassandra.cluster import Cluster
+from cassandra.query import SimpleStatement
+import uuid
+
+cluster = Cluster(['127.0.0.1'])
+session = cluster.connect('my_keyspace')
+
+def insert_with_ttl(table, values, ttl):
+    query = f"INSERT INTO {table} (id, {', '.join(values.keys())}) VALUES (uuid(), {', '.join(['%s'] * len(values))}) USING TTL {ttl}"
+    session.execute(SimpleStatement(query), list(values.values()))
+
+# Example Usage
+insert_with_ttl('ici_transaction_mtm_f', {'transaction_date': '2024-06-18', 'amount': 1000}, 1468800)
+insert_with_ttl('analytic_seq_attribution_f', {'attribution_date': '2024-06-18', 'attribution_value': 'value'}, 1209600)
+insert_with_ttl('trade_mtm_src_f', {'trade_date': '2024-06-18', 'trade_value': 'value'}, 2592000)
+
+By following these steps, you can ensure that each insert operation into your specified tables uses the correct TTL, thereby managing the lifespan of your data effectively.
+
+
+----> 
+1. Setting Default TTL at the Table Level
+Cassandra allows you to set a default TTL for a table. All rows inserted into this table will automatically use this TTL unless overridden in the INSERT statement.
+
+CREATE TABLE IF NOT EXISTS my_keyspace.my_table (
+    id UUID PRIMARY KEY,
+    data TEXT
+) WITH default_time_to_live = 900;
+
+if existed: 
+ALTER TABLE my_keyspace.my_table WITH default_time_to_live = 900;
+
+
+2. set manual TTL in your inserts :
+
+3.  Using a Client-Side Wrapper Function
+Create a function in your application code to handle inserts, ensuring the TTL is always applied.
+
+
+4. Using Middleware or ORM
+If you are using an ORM (Object-Relational Mapping) library or middleware in your application, you can customize it to automatically add TTL to all insert operations.
+
+Example with Python and an ORM like Cassandra-Driver:
+You can create a custom function or override the insert method in your models to include TTL.
+
+
+5. Server-Side Triggers (Not Natively Supported)
+Cassandra does not natively support triggers like traditional RDBMS, but you can simulate this behavior with an external service that monitors changes and enforces TTL. This is more complex and involves additional infrastructure.
+
+Summary
+The simplest and most efficient method is to set the default TTL at the table level using ALTER TABLE with default_time_to_live. This approach requires no changes to your insert statements or client code and ensures consistency across all inserts.
+
+No, the command ALTER TABLE my_keyspace.my_table WITH default_time_to_live = 900; will not affect existing rows in the table. The default_time_to_live setting only applies to rows inserted after the TTL is set. Existing rows will remain unaffected and will not be automatically deleted after 15 minutes.
+
+How TTL Works in Cassandra
+New Rows: Any new rows inserted after the default_time_to_live is set will have a TTL of 900 seconds (15 minutes) and will be automatically deleted after this period.
+Existing Rows: Rows that were already present in the table before the TTL was set will retain their original state and will not be affected by the new TTL setting. They will not be deleted unless explicitly updated with a TTL or deleted manually.
+
+
+
+Applying TTL to Existing Rows
+If you need to apply a TTL to existing rows, you would need to update them explicitly with a TTL. This can be done using an UPDATE statement with the USING TTL clause.
+
+
+Alternatively, if you have many rows and need to apply TTL to all of them, you would typically need to run a script that iterates over all rows and updates them with the desired TTL.
+
+Python Script to Update Existing Rows with TTL
+Here’s an example script using the cassandra-driver to apply TTL to all existing rows:
+
+
+from cassandra.cluster import Cluster
+from cassandra.query import SimpleStatement
+import uuid
+
+# Connect to the Cassandra cluster
+cluster = Cluster(['127.0.0.1'])  # Replace with your cluster IP
+session = cluster.connect('my_keyspace')
+
+# Define the TTL (15 minutes)
+ttl = 900
+
+# Fetch all existing rows
+rows = session.execute("SELECT id, data FROM my_table")
+
+# Update each row with the TTL
+for row in rows:
+    query = "UPDATE my_table SET data = %s USING TTL %s WHERE id = %s"
+    session.execute(SimpleStatement(query), (row.data, ttl, row.id))
+
+print("All existing rows have been updated with a TTL of 15 minutes.")
+
+
+cassandra-driver refers to the official Python driver provided by DataStax for Cassandra. This driver allows Python applications to connect to Cassandra clusters, execute queries, and manage data within Cassandra databases.
+
+
+
+
+
+=======================================
+
+Data consistency : 
+read repair :  mechanism used to maintain consistency of data across multiple replicas (copies) of data stored on different nodes (servers) in a Cassandra cluster.
+- Cassandra replicates data across multiple nodes (servers) to ensure fault tolerance and high availability.
+- Each piece of data (row) typically has multiple copies stored on different nodes across different data centers.
+- When a client application reads data from Cassandra, it can specify a consistency level that determines how many replicas must respond with the same data for the read operation to be considered successful. 
+    ---> example, a consistency level of QUORUM requires a majority of replicas (more than half) to agree on the data.
+
+- Cassandra compares data (using merkel trees) which is a read from different replicas then it compares that data and checks if the data received from different replicas matches.
+- If inconsistencies (differences in data) are detected among the replicas for the same piece of data, this is known as a read inconsistency.
+
+Read Repair what it does ::::
+- The node coordinating the read operation (coordinator node) sends a request to the replicas with inconsistent data, instructing them to update their data to match the correct version.
+- The replicas then synchronize their data to resolve the inconsistency.
+
+_____________________
+
+**** dc_local_read_repair_chance :::: Default Value: 0.1 (10%) 
+Purpose: Controls the probability of performing a read repair during a read operation for the local data center (DC) replica nodes.
+Best Practice: It's generally recommended to leave this parameter at its default value (0.1), 
+
+
+Default Value: 0.1 (10%) : Higher values increase read consistency by triggering more read repairs but can impact read latency and load on nodes.
+                         : Lower values reduce read repair overhead but may sacrifice consistency under certain failure scenarios.
+0: This means that Cassandra will not automatically attempt to repair data inconsistencies at the local data center level during read operations.
+
+benefits : Disabling read repairs can reduce the overhead on read operations because Cassandra won’t need to perform additional checks and repairs.
+- In scenarios where minimizing latency and overhead is critical, disabling read repairs might be a trade-off worth considering, provided the application can handle potential data inconsistencies.
+
+Dis-advantages: 
+- Disabling local read repairs increases the risk of data inconsistencies between replicas within the same data center.
+- Without read repairs, some replicas might have older versions of data, leading to stale reads.
+
+
+ex: ALTER TABLE my_keyspace.my_table WITH dc_local_read_repair_chance = 0.1;
+
+
+***** read_repair_chance :  Default Value: 0.0 (disabled by default)
+Purpose: Controls the probability of performing a read repair during a read operation across all replica nodes (all DCs).
+
+-- Higher values increase read consistency across all replicas but can impact read performance and increase network overhead. 
+-- Lower values reduce read repair overhead but may result in eventual consistency issues in case of node failures.
+
+	
+Adjusting dc_local_read_repair_chance and read_repair_chance should be done cautiously based on specif 	ic application requirements, with an emphasis on maintaining a balance between performance, consistency, and resilience in your Cassandra cluster. 
+
+-- need through testing, analyisis before frezzing them and test in prod. 
+
+
+NODETOOL STATUS shows we have only 1 DC and all nodes are locally available in CASSANDRA 
+-- data center (DC) is a logical grouping of nodes within a cluster. This concept allows Cassandra to manage and optimize the distribution and replication of data across geographically or logically distinct locations. 
+
+- A data center in Cassandra is not necessarily a physical data center. Instead, it's a logical grouping of nodes within the cluster. These nodes share similar network latency characteristics and are typically located in the same geographical area or within the same logical boundary (e.g., cloud region, availability zone).
+
+- Cassandra uses the "NetworkTopologyStrategy" for replication when a cluster spans multiple data centers. This strategy allows for specifying different replication factors for each data center, providing fine-grained control over data distribution and redundancy.
+
+describe keyspace : 
+CREATE KEYSPACE my_keyspace WITH replication = {
+  'class': 'NetworkTopologyStrategy',
+  'DC1': '3',
+  'DC2': '2'
+};
+-- In this example, my_keyspace is configured to replicate data across two data centers, DC1 and DC2. The replication factor is 3 for DC1 and 2 for DC2, meaning each piece of data will have three copies in DC1 and two copies in DC2.
+
+
+--> 'DC1': '3': This part of the definition specifies that for the data center named DC1, there will be a replication factor of 3. This means that each piece of data will be stored on 3 different nodes within DC1.
+--> durable_writes = true: This ensures that writes are committed to the commit log on disk before acknowledging the write to the client. This setting provides durability guarantees for write operations, ensuring that data is not lost even if there is a failure shortly after the write operation.
+
+
+
+
+
+
+
+================================
+In Apache Cassandra, the gc_grace_seconds setting is a table-level configuration that specifies the amount of time to wait before tombstones (markers for deleted data) are eligible for garbage collection.
+
+-- > Default Value: 864000 seconds (10 days)
+- -> Purpose: It determines how long Cassandra will keep tombstones before they are eligible for garbage collection.
+--> Tombstones are retained for a period defined by gc_grace_seconds to ensure that all replicas have had sufficient time to synchronize the deletion.
+--> After the gc_grace_seconds period has elapsed, tombstones are eligible to be purged during the next compaction process.
+--> Running regular repairs within this grace period is crucial to ensure that all nodes have a consistent view of the data.
+
+--> Keeping tombstones for too long can lead to performance degradation, as read operations have to scan through tombstones.
+--> Setting gc_grace_seconds too low can risk inconsistency if not all replicas have acknowledged the deletion.
+
+
+
+======================================
+BLOOM_FILTER_FP_CHANCE = 0.01 
+data structure that helps Cassandra efficiently determine whether a specific row exists in an SSTable (Sorted Strings Table) without having to scan the entire file.
+--> Helps to avoid false positive (i.e., the Bloom filter indicates that a partition key might exist in an SSTable when it actually does not).
+
+--> Lower values reduce the chance of false positives but increase the memory usage of the Bloom filter.
+--> A lower bloom_filter_fp_chance value results in fewer unnecessary disk reads, which can improve read performance, especially for read-heavy workloads.
+--> However, a lower false positive chance requires more memory to store the Bloom filter, which can increase the overall memory usage of your nodes.
+
+---> 0.01 (1%): This is a typical value for tables with high read throughput, balancing memory usage and read efficiency.
+---> 0.1 (10%): A higher false positive chance can be acceptable for tables with lower read throughput or when memory is a concern.
+---> For read-heavy workloads, consider setting a lower bloom_filter_fp_chance (e.g., 0.01) to minimize false positives and improve read performance.
+     For write-heavy workloads or when memory is constrained, a higher bloom_filter_fp_chance (e.g., 0.1) might be more appropriate.
+
+
+
+======================================
+
+caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+
+--> 'keys': 'ALL': This setting means that all partition keys will be cached. Caching all partition keys ensures that the partition index is kept in memory, which helps quickly locate the partitions on disk. This can significantly speed up read operations, especially for large tables where the cost of searching for partition keys on disk can be high.
+--> 'rows_per_partition': 'NONE': This setting means that no rows within partitions will be cached. This means that while the partition index (keys) is cached, the actual row data within those partitions is not. Every read operation will still need to access the disk to retrieve row data, which could impact performance depending on the size of the partitions and the frequency of access to the row data.
+
+--> Positive: By not caching rows, this setting reduces memory usage compared to caching both keys and rows.
+--->< Negative: If the application frequently accesses certain rows within a partition, not caching these rows might lead to higher latency due to repeated disk access.
+
+
+
+=======================================
+
+compaction = {  'class': 'SizeTieredCompactionStrategy',  'max_threshold': 32,  'min_threshold': 4}
+
+The compaction option in Cassandra specifies the strategy used to manage how SSTables (Sorted Strings Tables) are merged and compacted. The settings you've provided configure the SizeTieredCompactionStrategy (STCS) with specific thresholds. 
+
+SizeTieredCompactionStrategy (STCS) --> default -->  triggers compactions based on the size of SSTables --> It groups SSTables of similar sizes and merges them together to manage the number of SSTables and optimize read performance.
+
+--> max_threshold: 32 --> The maximum number of SSTables that can be compacted together in a single compaction run.
+Meaning: When the number of SSTables of similar size exceeds this threshold, a compaction is triggered to merge them into fewer SSTables. Here, the value 32 means that if there are more than 32 SSTables of similar size, they will be compacted into fewer SSTables.
+
+--> min_threshold: 4 --> Here, the value 4 means that when there are at least 4 SSTables of similar size, a compaction process will begin to merge them.
+
+
+
+========================================
+compression = {'chunk_length_in_kb' : 64, 'class' : 'org.apache.cassandra.io.compress.LZ4Compressor'}
+
+- 'chunk_length_in_kb' : 64: This setting specifies the size of the data chunks that Cassandra compresses. In this case, each chunk is 64 KB in size. Smaller chunk sizes can lead to better compression ratios but may also increase the CPU overhead.
+
+- you can specify compression options to reduce the amount of disk space used by the table. Here is how you might use this setting in a CREATE TABLE or ALTER TABLE statement:
+
+benefits :
+- When creating or altering a table in Cassandra, you can specify compression options to reduce the amount of disk space used by the table. Here is how you might use this setting in a CREATE TABLE or ALTER TABLE statement:
+- Compressed data can reduce I/O operations because less data needs to be read from or written to disk.
+
+issues : CPU Overhead: Compression and decompression require CPU resources, so there can be a trade-off between space savings and CPU usage.
+- The chunk_length_in_kb parameter can affect performance. Smaller chunk sizes might improve compression ratios but increase CPU usage, while larger chunk sizes might have the opposite effect.
+
+
+
+=========================================
+When you set speculative_retry to 99percentile, it means that Cassandra will trigger a speculative retry if the initial read request does not receive a response within the 99th percentile of the typical read latency for that table. In other words, it uses historical read latency statistics to determine when to initiate a speculative retry.
+
+advantages : improves read latency
+issues : Increased Load: Speculative retries can increase the load on the cluster because multiple read requests may be issued for the same operation.
+
+
+========================================
+ min_index_interval = 128 (default values) 
+min_index_interval: This parameter determines the minimum number of entries in the partition index between which an index entry is created.
+it means that Cassandra will create an index entry for every 128 rows in the partition. This helps control the size of the index and the overhead associated with maintaining it.
+
+
+issues : Lower values of min_index_interval can increase the size of the index and potentially improve query performance by reducing the number of rows scanned per partition lookup. However, this comes at the cost of increased storage overhead and potentially higher memory and CPU usage.
+
+
+=======================================
+max_index_interval is a configuration parameter that determines the maximum number of index entries between successive entries in the partition index. Here's what max_index_interval = 2048 signifies:
+
+When max_index_interval is set to 2048, it means that Cassandra will create an index entry for every 2048 rows in the partition at most. This controls the density of the index and affects how efficiently Cassandra can perform partition key lookups during queries. 	
+
+
+=======================================
+
+crc_check_chance = 1.0 (default)
+
+ is a configuration parameter that determines the probability (or chance) with which Cassandra performs cyclic redundancy check (CRC) validation on SSTable data blocks during read operations.   helps ensure that data read from SSTables is accurate and has not been corrupted.
+
+When you set crc_check_chance to a value between 0.0 and 1.0, it represents the probability that Cassandra will perform CRC validation on SSTable data blocks during reads.
+
+Setting crc_check_chance to 1.0 ensures that CRC validation is always performed, while 0.0 disables CRC validation entirely.
+
+issues: Performance Impact: Performing CRC checks can impose a minor overhead on read operations due to additional computation. Therefore, the value of crc_check_chance should be chosen carefully based on the desired balance between data integrity and performance.
+
+
+==========================================
+cdc = false:
+
+Disables Change Data Capture for the specified keyspace or table.
+Changes (inserts, updates, deletes) to data in the table will not be logged in the commit log specifically for CDC purposes.
+Applications relying on CDC features won't receive change events for this table.
+
+
+
+=======================================
+Consistency Levels in Cassandra
+Consistency levels in Cassandra determine how many replicas must acknowledge a read or write operation before it is considered successful. Here's a brief overview of some common consistency levels:
+
+ANY: The write must be written to at least one node, including hinted handoff recipients.
+ONE: The read or write must be acknowledged by at least one replica node.
+TWO: The read or write must be acknowledged by at least two replica nodes.
+THREE: The read or write must be acknowledged by at least three replica nodes.
+QUORUM: The read or write must be acknowledged by a majority of the replica nodes (usually defined as (N/2) + 1).
+LOCAL_QUORUM: A majority of the replica nodes in the local datacenter must acknowledge the read or write.
+EACH_QUORUM: A majority of the replica nodes in each datacenter must acknowledge the read or write.
+ALL: All replica nodes must acknowledge the read or write.
