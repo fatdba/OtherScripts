@@ -1,0 +1,132 @@
+Major and Minor compactions :
+-- Compaction is the process of merging SSTables (Sorted String Tables) to optimize read performance and reclaim space by removing obsolete data, including tombstones and redundant data.
+-- compaction is a node-local operation, meaning that it must be run on each node individually. 
+-- Since Cassandra is a distributed database with each node handling its own data, compaction must be performed on each node separately. Compaction is not a cluster-wide operation but a local one because each node manages its own SSTables.
+-- In general, compaction strategies require ~50% free space to operate “safely".
+Therefore compaction when generating new SSTables can break these hard links, furthermore compaction won’t work if not enough free space available on disk due to e.g. large snapshots due to many hard links broken.
+
+
+---------------------------------------
+cleaning up tombstones (markers for deleted data) and expired data, freeing up space on disk. 
+
+grep 'Tombstone' /var/log/cassandra/system.log
+
+
+
+Minor compactions : happens automatically 
+_________________________________________________________
+- check "nodetool compactionstats"
+
+pending tasks: 0
+        compaction type   keyspace       table             completed           total           unit
+        Compaction        my_keyspace    my_table          1024                2048            bytes
+Active compaction remaining time : 0h00m00s
+
+--> Pending Tasks: Should be low or zero for healthy compactions.
+Active Compactions: Details of any compactions currently in progress.
+
+
+
+
+----> nodetool cfstats my_keyspace.my_table
+
+
+
+---> grep 'Compaction' /var/log/cassandra/system.log
+
+Look for entries indicating the start and completion of compactions. Example log entries:
+INFO [CompactionExecutor:1] 2024-06-18 12:00:00,000 CompactionTask.java:301 - Compacting [SSTableReader(path='...'), SSTableReader(path='...')]
+INFO [CompactionExecutor:1] 2024-06-18 12:00:05,000 CompactionTask.java:340 - Compacted to [SSTableReader(path='...')] to level=0. 20000 bytes to 10000 (~50% of original) in 5000ms.  Read Throughput = 4MB/s, Write Throughput = 2MB/s
+
+
+
+---> SELECT * FROM system.compaction_history;
+
+---> SELECT * FROM system.compaction_history WHERE keyspace_name = 'my_keyspace' AND columnfamily_name = 'my_table';
+
+
+
+======================================
+
+
+
+Major Compaction :
+____________________________
+
+-- single table 
+nodetool compact keyspace_name table_name
+
+-- all tables in keyspace 
+nodetool compact keyspace_name
+
+-- entire database
+nodetool compact
+
+***** Enable parallelism : In CASSANDRA.YAML ---> Number of concurrent compaction threads per CPU core.   concurrent_compactors: 2
+                                             ---> compaction_throughput_mb_per_sec: 64 ---> control the throughput of compactions. Increasing it can make compactions faster, but it might                                                     impact the performance of other operations. The default is often 16 MB/s, but you can increase it to a value like 64 MB/s or higher,                                                   depending on your disk I/O capacity.
+
+***** Disk Space: Ensure you have sufficient disk space available. Major compaction temporarily requires additional space to rewrite SSTables.
+
+
+
+
+Garbage Collectoion :
+focuses specifically on garbage collection, which involves removing tombstones (markers for deleted data) and expired data (data with TTLs that have expired). It helps in reclaiming space by permanently deleting data that is no longer needed.
+
+The nodetool garbagecollect command is available from Cassandra 3.10 onwards. This command runs a series of smaller compactions that also check overlapping sstables. It is more CPU intensive and time-consuming than nodetool compact, but requires less free disk space.
+________________________________
+
+nodetool -h localhost garbagecollect
+--> forces immediate garbage collection of tombstones in one or more tables. Tombstones are markers for deleted data, and garbage collection is the process of reclaiming space by removing these tombstones after the gc_grace_seconds period has passed.
+
+-->  The -h localhost flag specifies that the command should be executed on the local node. This is typically the default behavior, so explicitly specifying -h localhost is often redundant.
+
+--> Reclaims Space: Reclaims disk space by removing tombstones that are older than the gc_grace_seconds period.
+
+nodetool garbagecollect
+nodetool garbagecollect my_keyspace my_table
+nodetool garbagecollect my_keyspace my_table -pr
+
+--> -pr: Indicates that the garbage collection should be limited to the primary range of each node.
+
+
+
+
+errors:
+_____________
+ "Not enough space for compaction, estimated sstables = 1, expected write size = 61055287773".
+
+** In general, compaction strategies require ~50% free space to operate “safely".
+Therefore compaction when generating new SSTables can break these hard links, furthermore compaction won’t work if not enough free space available on disk due to e.g. large snapshots due to many hard links broken.
+
+In general, if compaction stops due to lack of disk space and you run out of disk space entirely, if you're sure you have a consistent copy of the data elsewhere in the cluster, you can safely bring a node offline, delete the data, then run a full repair once back online.
+
+Just be sure you have a good copy of the data on the nodes that will remain online. If you are unsure, you could always start by removing only the keyspace data that has an RF of 10, then try to get compaction caught up on the RF 5 keyspace before repairing the RF 10 keyspace. If you go that route, be sure you read with a consistency level higher than ONE/LOCAL_ONE and fix a single node at a time to ensure you're reading consistent data.
+
+
+
+
+
+** Check for tables with less sstable counts :
+nodetool cfstats my_keyspace.my_table
+  -- SSTable count: X
+* If your Cassandra deployment spans multiple nodes, run the nodetool cfstats command on each node to get accurate SSTable counts for that table across the cluster.
+* Alternatively, you can use monitoring tools like DataStax OpsCenter 
+
+* Are we taking automated or manual snapshots or backups and keeping them on the same disk ? If yes, can we check if there are few that we can take off or drop.
+** ghost snapshots are the ones without SSTable available.
+*** Check if snapshots already present on the cassandra data directory or not by using ‘nodetool listsnapshot’ 
+
+a) Run nodetool command to clear each of the (ghost) snapshots identified
+$ nodetool clearsnapshot -t <snapshot_name>
+
+
+
+3) Add node(s) capacity
+   -- Add nodes and run nodetool cleanup afterwards
+   -- Increase disk size of the node(s)
+
+
+*** check for any hprof files on disk or any other big chunk of trace etc. 
+
+** Check ‘nodetool compactionstats’. Current overhead of compaction by listing temporary sstables : tmpData.db. fix: disable compaction. delete them. run compaction on one by one.
