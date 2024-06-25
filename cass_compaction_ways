@@ -1,0 +1,50 @@
+SELECT keyspace_name, table_name, tombstones FROM system_schema.sstables WHERE keyspace_name = 'mykeyspace' AND table_name = 'mytable';
+
+TRACING ON;
+
+
+TRACING ON;
+SELECT * FROM <keyspace>.<table>;
+TRACING OFF;
+SELECT * FROM system_traces.events WHERE session_id = <trace_id>;
+
+
+Are there any system tables or dynamic views which we use to get the count of tombstones on a table ? 
+I am not getting results when using "nodetool cfstats" as its giving 0 for tomestones related columns'values. 
+====================
+
+now in absence of hard disk space and resource limitations, nodetool compact (full database) ins not possible, we are thinking to do it batchwise first to start with the tables or keyspaces on the basis of their size, staleness (number of tombstones count) and criticality. and will do 'major compaction' for each of those tables or keyspaces. 
+
+
+Pre-Reqs:
+-- As a best practise, will do an incremental repair (nodetool repair -pr keyspace_name table_name) for those tables to ensure data consistency across all the nodes. 
+ecause compaction involves merging SSTables, and you want to ensure you are merging consistent data.
+
+- tombstone reconsiltation : Running repair ensures that tombstones (markers for deleted data) are propagated to all replicas. This ensures that during compaction, all the necessary tombstones are in place to delete obsolete data.
+-- or to fix -- "zombie data" (deleted data reappearing) because not all nodes may be aware of deletions. 
+
+though I have not much idea about the dataset, overall database and keyspace sizes, but I have few ideas in my mind and would like to discuss ...
+this restructuring might need some time, as it needs some approvals etc., in the meantime 
+
+Gradual/Phase-wise appraoch:
+----------------------------------
+--> will take snapshots or backup of tables in question and will do it when we have least load running on the system, have to identifiy that timeslot 
+
+--> Prioritize tables that are the most critical for your application’s performance and stability.
+Use nodetool cfstats to gather statistics on table sizes and number of SSTables.
+
+** ------------------> Focus on tables with a high number of tombstones, as they can be cleaned up to reclaim space.
+
+
+--> Run compaction on selected tables one by one to manage disk space and resource consumption.
+nodetool compact keyspace_name table_name
+
+--> Ensure you have sufficient disk space before starting compaction. Compaction requires temporary disk space to create new SSTables.
+
+--> throttle the compaction speed to reduce the impact on system resources by adjusting the compaction_throughput_mb_per_sec setting in cassandra.yaml.
+
+***** Enable parallelism : In CASSANDRA.YAML ---> Number of concurrent compaction threads per CPU core.   concurrent_compactors: 2
+                                             ---> compaction_throughput_mb_per_sec: 64 ---> control the throughput of compactions. Increasing it can make compactions faster, but it might                                                     impact the performance of other operations. The default is often 16 MB/s, but you can increase it to a value like 64 MB/s or higher,                                                         depending on your disk I/O capacity.
+
+
+
