@@ -1,0 +1,55 @@
+<mxfile host="Electron" modified="2024-07-09T16:56:07.075Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.6.5 Chrome/114.0.5735.243 Electron/25.3.1 Safari/537.36" etag="vQYIP3S0Tvvp-rJ3lCFM" version="21.6.5" type="device">
+  <diagram name="Page-1" id="QFV25S3pz4FK8YWCKPME">
+    <mxGraphModel dx="794" dy="519" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-1" value="RAC Node 2" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="55" y="270" width="110" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-2" value="Standby 1&amp;nbsp;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="350" y="190" width="100" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-3" value="Standby 2" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="520" y="190" width="110" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-7" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" target="Re9RIljA-gFkJfKUQ3hH-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="450" y="230" as="sourcePoint" />
+            <mxPoint x="640" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-49" value="EBS" style="sketch=0;html=1;dashed=0;whitespace=wrap;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];verticalLabelPosition=bottom;align=center;verticalAlign=top;shape=mxgraph.kubernetes.icon;prIcon=api" vertex="1" parent="1">
+          <mxGeometry y="40" width="50" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-56" value="RAC Node 1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="55" y="160" width="110" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-101" value="" style="whiteSpace=wrap;html=1;aspect=fixed;labelBackgroundColor=#FFCC99;opacity=50;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="10" y="150" width="210" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-102" value="19c Oracle RAC Cluster" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="60" y="110" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-103" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="Re9RIljA-gFkJfKUQ3hH-1" target="Re9RIljA-gFkJfKUQ3hH-56">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="310" as="sourcePoint" />
+            <mxPoint x="430" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-104" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.28;exitY=0.99;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="Re9RIljA-gFkJfKUQ3hH-49" target="Re9RIljA-gFkJfKUQ3hH-101">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="310" as="sourcePoint" />
+            <mxPoint x="430" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Re9RIljA-gFkJfKUQ3hH-105" value="" style="endArrow=classic;html=1;rounded=0;exitX=1.016;exitY=0.403;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="Re9RIljA-gFkJfKUQ3hH-101" target="Re9RIljA-gFkJfKUQ3hH-2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="24" y="98" as="sourcePoint" />
+            <mxPoint x="62" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
