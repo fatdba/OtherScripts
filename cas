@@ -1,3 +1,5 @@
+https://chatgpt.com/c/88c63276-7d35-4ee5-8576-5e9d9101643b
+
 Improving read latency in Apache Cassandra, especially with a large database size like yours (65 TBs) spread across multiple data centers (DCs), involves tuning several configuration parameters to optimize query performance. Here are some key Cassandra parameters and considerations that can help improve read request times:
 
 ### 1. **Partition Size and Compaction**
