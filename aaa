@@ -1,0 +1,136 @@
+Here’s a step-by-step **installation guide** for setting up the **DataStax Agent 6.8.41** on a Linux server using YUM repository configuration:
+
+---
+
+# 🛠️ **DataStax Agent 6.8.41 Installation Guide**
+
+This guide walks you through setting up the DataStax Agent, configuring the repository, resolving common RPM locking issues, and verifying the agent’s status.
+
+---
+
+## 📌 **Prerequisites**
+- Linux machine with internet access
+- `sudo` or root privileges
+- IP address of the Cassandra node for agent configuration
+
+---
+
+## 📋 **Step-by-Step Installation Instructions**
+
+### 1️⃣ **Switch to Root User**
+```bash
+sudo su -
+```
+
+---
+
+### 2️⃣ **Create DataStax YUM Repository**
+Create the file:  
+```bash
+vi /etc/yum.repos.d/datastax.repo
+```
+
+Add the following content:
+
+```ini
+[opscenter]
+name = DataStax Repository
+baseurl = https://rpm.datastax.com/enterprise
+enabled = 1
+gpgcheck = 0
+```
+
+Save and exit the file.
+
+---
+
+### 3️⃣ **Import the DataStax GPG Key**
+
+You may need to resolve any lock errors (see Step 6 below if needed):
+
+```bash
+rpm --import http://rpm.datastax.com/rpm/repo_key
+```
+
+---
+
+### 4️⃣ **(Optional) Remove Any Existing Agent**
+If an older or incorrect version is installed:
+
+```bash
+yum remove -y datastax-agent
+```
+
+---
+
+### 5️⃣ **Install Specific Agent Version**
+Install the required version (e.g., 6.8.41-1):
+
+```bash
+yum install -y datastax-agent-6.8.41-1
+```
+
+---
+
+### 6️⃣ **[Troubleshooting] RPM Lock Error**
+If you encounter an error like:
+```bash
+error: cannot get exclusive lock on /var/lib/rpm/.rpm.lock
+```
+
+Run the following:
+
+```bash
+fuser /var/lib/rpm/.rpm.lock
+kill -9 <PID>   # Replace <PID> with the output of fuser
+rm -rf /var/lib/rpm/.rpm.lock
+rpm --rebuilddb
+rpm --import http://rpm.datastax.com/rpm/repo_key
+```
+
+---
+
+### 7️⃣ **Configure Agent to Communicate with Cluster**
+Edit the agent’s configuration file:
+
+```bash
+vi /var/lib/datastax-agent/conf/address.yaml
+```
+
+Update the `stomp_interface` value to the IP address of your Cassandra node:
+
+```yaml
+stomp_interface: 10.231.98.30
+```
+
+Save and exit.
+
+---
+
+### 8️⃣ **Start and Enable the Agent**
+```bash
+systemctl start datastax-agent
+systemctl enable datastax-agent
+systemctl status datastax-agent
+```
+
+---
+
+### 9️⃣ **(Optional) Download Specific Agent Release**
+If you want to manually download a version:
+
+```bash
+curl -L http://downloads.datastax.com/enterprise/6.8.42-1.tar.gz
+```
+
+---
+
+## ✅ **Post-Installation Checklist**
+- [ ] Agent service is running
+- [ ] Agent is connected to Cassandra cluster
+- [ ] No version mismatch between agent and DSE nodes
+- [ ] Agent logs are clean (`/var/log/datastax-agent/`)
+
+---
+
+Let me know if you want this as a downloadable PDF or markdown format!
